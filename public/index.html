@@ -287,6 +287,40 @@
   }
   .settings-gear svg { width: 62%; height: 62%; color: #55555c; }
 
+  /* ---------- Access panel ---------- */
+  .pane-desc { color: rgba(0,0,0,0.5); font-size: 13px; margin-bottom: 18px; line-height: 1.5; }
+  body.dark .pane-desc { color: rgba(255,255,255,0.5); }
+  .wl-add { display: flex; gap: 8px; margin-bottom: 16px; max-width: 420px; }
+  .wl-add input {
+    flex: 1; height: 30px; border-radius: 7px; border: 0.5px solid rgba(0,0,0,0.2);
+    padding: 0 10px; font-size: 13px; outline: none; background: #fff; color: #1d1d1f;
+    user-select: text; -webkit-user-select: text;
+  }
+  body.dark .wl-add input { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #f5f5f7; }
+  .wl-add button {
+    height: 30px; padding: 0 14px; border-radius: 7px; border: none;
+    background: #2864d9; color: #fff; font-size: 13px; cursor: default;
+  }
+  .wl-add button:hover { background: #2255bd; }
+  .wl-list { max-width: 420px; display: flex; flex-direction: column; gap: 6px; }
+  .wl-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 12px; border-radius: 7px; background: rgba(0,0,0,0.05); font-size: 13px;
+  }
+  body.dark .wl-row { background: rgba(255,255,255,0.07); }
+  .wl-row .rm { color: rgba(0,0,0,0.4); padding: 0 4px; }
+  .wl-row .rm:hover { color: #e0443e; }
+  body.dark .wl-row .rm { color: rgba(255,255,255,0.4); }
+  .wl-note { font-size: 12.5px; color: rgba(0,0,0,0.4); margin-top: 14px; }
+  body.dark .wl-note { color: rgba(255,255,255,0.4); }
+  .logout-btn {
+    margin-top: 10px; height: 30px; padding: 0 14px; border-radius: 7px;
+    border: 0.5px solid rgba(0,0,0,0.2); background: transparent; font-size: 13px; color: inherit;
+  }
+  body.dark .logout-btn { border-color: rgba(255,255,255,0.25); }
+  .logout-btn:hover { background: rgba(0,0,0,0.06); }
+  body.dark .logout-btn:hover { background: rgba(255,255,255,0.08); }
+
   /* ---------- Appearance picker ---------- */
   .appearance-row { display: flex; gap: 24px; margin-top: 8px; }
   .theme-card { cursor: default; text-align: center; }
@@ -451,7 +485,7 @@
 </div>
 <div class="desk-icon" id="icon-studio" style="top: 170px; right: 24px;">
   <div class="glyph"><img src="/studio-icon.png" alt="" class="app-icon-img"></div>
-  <div class="label">EMOTIV Studio</div>
+  <div class="label">Emotiv Studio</div>
 </div>
 
 <!-- ===== Dock ===== -->
@@ -843,7 +877,55 @@ function openSettings() {
 
 function renderSettingsPane(w, section) {
   const pane = w.el.querySelector(".settings-pane");
-  if (section === "Appearance") {
+  if (section === "General") {
+    pane.innerHTML = `<h2>General</h2><div class="pane-desc" id="me-line">Checking session…</div>`;
+    fetch("/api/me").then(r => r.json()).then(me => {
+      const line = pane.querySelector("#me-line");
+      if (!line) return;
+      if (me.authEnabled && me.email) {
+        line.innerHTML = `Signed in as <b>${me.email}</b><br><button class="logout-btn" onclick="location.href='/logout'">Log out</button>`;
+      } else {
+        line.textContent = "Authentication not configured yet — site is open.";
+      }
+    }).catch(() => {});
+  } else if (section === "Access") {
+    pane.innerHTML = `
+      <h2>Access</h2>
+      <div class="pane-desc">Anyone <b>@emotiv.com</b> can sign in with Google. Invite external collaborators below.</div>
+      <div class="wl-add" data-nodrag>
+        <input id="wl-email" placeholder="name@example.com" spellcheck="false">
+        <button id="wl-invite">Invite</button>
+      </div>
+      <div class="wl-list" id="wl-list"></div>
+      <div class="wl-note" id="wl-note"></div>`;
+    const listEl = pane.querySelector("#wl-list");
+    const noteEl = pane.querySelector("#wl-note");
+    const render = list => {
+      listEl.innerHTML = list.length
+        ? list.map(e => `<div class="wl-row"><span>${e}</span><span class="rm" data-email="${e}">✕</span></div>`).join("")
+        : `<div class="pane-desc">No external users invited yet.</div>`;
+      listEl.querySelectorAll(".rm").forEach(btn => btn.addEventListener("click", async () => {
+        const r = await fetch("/api/whitelist?email=" + encodeURIComponent(btn.dataset.email), { method: "DELETE" });
+        if (r.ok) render(await r.json());
+      }));
+    };
+    fetch("/api/whitelist").then(async r => {
+      if (r.ok) render(await r.json());
+      else noteEl.textContent = (await r.json()).error || "Unavailable.";
+    }).catch(() => { noteEl.textContent = "Unavailable."; });
+    pane.querySelector("#wl-invite").addEventListener("click", async () => {
+      const input = pane.querySelector("#wl-email");
+      const email = input.value.trim();
+      if (!email) return;
+      const r = await fetch("/api/whitelist", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      if (r.ok) { input.value = ""; render(await r.json()); }
+      else noteEl.textContent = (await r.json()).error || "Failed.";
+    });
+  } else if (section === "Appearance") {
     pane.innerHTML = `
       <h2>Appearance</h2>
       <div class="appearance-row">
@@ -875,7 +957,7 @@ function openStudio() {
     return;
   }
   createWindow({
-    title: "EMOTIV Studio",
+    title: "Emotiv Studio",
     className: "studio-win",
     w: Math.min(980, window.innerWidth - 200),
     h: Math.min(640, window.innerHeight - 160),
