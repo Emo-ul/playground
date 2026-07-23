@@ -229,7 +229,7 @@
 
   /* ---------- Chrome window ---------- */
   .chrome-win .titlebar { background: #dee1e6; height: 40px; }
-  .chrome-tabs { position: absolute; left: 80px; right: 12px; bottom: 0; display: flex; align-items: flex-end; height: 34px; pointer-events: none; }
+  .chrome-tabs { position: absolute; left: 80px; right: 12px; bottom: 0; display: flex; align-items: flex-end; gap: 8px; height: 34px; pointer-events: none; }
   .chrome-tab {
     pointer-events: auto; display: flex; align-items: center; gap: 8px;
     background: #fff; height: 34px; padding: 0 12px; min-width: 180px; max-width: 240px;
@@ -892,7 +892,7 @@ function openChrome(forceNew) {
 
   /* pages captured desktop-only (>=1440px) render in a virtual 1440px viewport, scaled to fit */
   const WIDE_BASE = 1440;
-  const needsWide = url => url.startsWith("/projects/hero");
+  const needsWide = url => url.startsWith("/projects/hero") && !url.includes("onboarding");
   function fitFrame() {
     const t = w.tabs.find(x => x.id === w.activeTab);
     if (!t || !needsWide(t.url)) {

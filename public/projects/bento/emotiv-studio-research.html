@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotiv Studio — Research Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0b;--panel:#141416;--panel2:#1a1a1e;--line:#26262a;--text:#f4f4f5;--muted:#9b9ba3;--dim:#66666e;--accent:#ff5c1a;--sci:#4f7cff;--r:22px;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  a{color:inherit}
+  .stage{max-width:1280px;margin:0 auto;padding:34px 40px 80px}
+  .tabs{display:flex;gap:6px;margin-bottom:30px}
+  .tab{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:11px;font-size:13.5px;font-weight:600;color:var(--muted);transition:all .15s;text-decoration:none}
+  .tab:hover{color:var(--text);background:var(--panel)}
+  .tab.on{background:var(--panel);color:#fff}
+  .tab .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .wordmark{font-size:13px;font-weight:800;letter-spacing:.22em;color:var(--dim)}
+  .head h1{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.02em}
+  .head-sub{color:var(--muted);font-size:15px;margin-bottom:30px;max-width:680px}
+
+  .bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:212px;gap:16px;grid-auto-flow:dense}
+  @media(max-width:1080px){.bento{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.bento{grid-template-columns:1fr}}
+  .tile{position:relative;border-radius:var(--r);overflow:hidden;text-align:left;background:var(--panel);isolation:isolate;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s}
+  .tile:hover{transform:scale(1.018);box-shadow:0 18px 50px rgba(0,0,0,.55);z-index:2}
+  .tile:active{transform:scale(.995)}
+  .tile.s22{grid-column:span 2;grid-row:span 2}
+  .tile.s21{grid-column:span 2}
+  .tile.s12{grid-row:span 2}
+  @media(max-width:560px){.tile.s22,.tile.s21{grid-column:span 1}}
+  .tile .bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;transition:transform .5s cubic-bezier(.2,.8,.2,1);filter:saturate(.75)}
+  .tile:hover .bgimg{transform:scale(1.05)}
+  .tile .scrim{position:absolute;inset:0;z-index:0;background:linear-gradient(183deg,rgba(8,10,18,.3) 20%,rgba(6,8,14,.9) 88%)}
+  .tile .inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:18px 20px}
+  .toprow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .pill{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:99px;background:rgba(79,124,255,.16);border:1px solid rgba(79,124,255,.4);backdrop-filter:blur(8px);color:#9ecbff}
+  .pill.hot{background:var(--accent);border-color:var(--accent);color:#fff}
+  .yr{margin-left:auto;font-size:10.5px;font-weight:700;color:#fff;background:rgba(10,10,12,.5);padding:5px 10px;border-radius:99px;backdrop-filter:blur(8px)}
+  .tile h3{font-family:'Source Serif 4',Georgia,serif;font-size:19px;font-weight:700;line-height:1.28;text-shadow:0 2px 16px rgba(0,0,0,.65)}
+  .tile.s22 h3{font-size:27px}.tile.s21 h3{font-size:21px}
+  .tile .cit{font-size:11.5px;color:rgba(255,255,255,.72);margin-top:7px;font-weight:500;font-style:italic}
+  .tile .stat{font-size:12px;font-weight:700;color:#9ecbff;margin-top:6px}
+
+  /* drawer */
+  .backdrop{position:fixed;inset:0;background:rgba(5,5,7,.62);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .28s;z-index:40}
+  .backdrop.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:#101013;border-left:1px solid var(--line);transform:translateX(102%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:50;display:flex;flex-direction:column}
+  .drawer.on{transform:translateX(0)}
+  .d-top{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line);min-height:56px}
+  .d-top .k{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9ecbff}
+  .d-close{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:15px;transition:all .15s;flex:none}
+  .d-close:hover{color:#fff;border-color:var(--muted)}
+  .d-scroll{overflow-y:auto;flex:1;padding:24px 26px 30px}
+  .d-hero{height:110px;border-radius:14px;margin-bottom:18px;background-size:cover;background-position:center;position:relative;filter:saturate(.8)}
+  .d-hero::after{content:"";position:absolute;inset:0;border-radius:14px;background:linear-gradient(160deg,rgba(8,10,16,.15),rgba(8,10,16,.6))}
+  .d-scroll h2{font-family:'Source Serif 4',Georgia,serif;font-size:23px;font-weight:700;line-height:1.28;margin-bottom:12px}
+  .citebox{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--sci);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#b9c2d8;margin-bottom:16px}
+  .citebox b{color:#e7ecf7}
+  .d-scroll p{font-size:14.5px;line-height:1.7;color:#c9c9d1;margin-bottom:14px}
+  .sect{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 0 11px}
+  .sect.sci{color:#9ecbff}
+  .d-scroll ul.plain{list-style:none;margin-bottom:6px}
+  .d-scroll ul.plain li{position:relative;padding:7px 0 7px 24px;font-size:14px;line-height:1.55;color:#c9c9d1}
+  .d-scroll ul.plain li::before{content:"";position:absolute;left:3px;top:14px;width:7px;height:7px;border-radius:2px;background:var(--sci)}
+  .d-scroll ul.plain li b{color:#e7ecf7}
+  /* method flow */
+  .flow{margin:6px 0 4px}
+  .fnode{position:relative;display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .fconn{height:32px;width:34px;margin-left:14px;display:flex;align-items:center;justify-content:center}
+  .fconn svg{display:block;filter:drop-shadow(0 0 7px rgba(79,124,255,.55))}
+  .fnode .fi{width:32px;height:32px;flex:none;border-radius:9px;background:rgba(79,124,255,.14);color:#9ecbff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+  .fnode .ft b{font-size:13px;font-weight:700;display:block;line-height:1.3}
+  .fnode .ft span{font-size:11.5px;color:var(--muted);line-height:1.45;display:block;margin-top:2px}
+  .docs a{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;text-decoration:none;margin-bottom:8px;transition:all .15s;background:rgba(255,255,255,.015)}
+  .docs a:hover{border-color:var(--sci);background:rgba(79,124,255,.08)}
+  .docs a .di{font-size:15px}
+  .docs a .dt{flex:1;font-size:13.5px;font-weight:600;color:#e7e7ee}
+  .docs a .dt span{display:block;font-weight:400;font-size:11px;color:var(--dim)}
+  .docs a .dx{color:var(--dim);font-size:13px}
+  .d-foot{padding:15px 26px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:9px}
+  .cta{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:14px 20px;border-radius:12px;text-decoration:none;transition:all .15s}
+  .cta:hover{background:#ff6e35;transform:translateY(-1px);box-shadow:0 8px 26px rgba(255,92,26,.4)}
+  .srclink{text-align:center;font-size:12px;color:var(--dim);text-decoration:none}
+  .srclink:hover{color:var(--muted)}
+  .foot-note{margin-top:26px;font-size:12px;color:var(--dim);line-height:1.7;max-width:720px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <nav class="tabs">
+    <a class="tab" href="emotiv-studio-home.html"><span>◐</span> Discover</a>
+    <a class="tab" href="emotiv-studio-experiments.html"><span>✦</span> Experiments</a>
+    <a class="tab" href="emotiv-studio-quest.html"><span>◇</span> Brain Quest</a>
+    <a class="tab on" href="emotiv-studio-research.html"><span class="d"></span> Research</a>
+  </nav>
+  <div class="head"><span class="wordmark">EMOTIV STUDIO</span><h1>The research library</h1></div>
+  <div class="head-sub">Ten peer-reviewed studies that put Emotiv headsets to work — validations, field experiments and firsts, retold in plain language. Every card links to the paper and to a paradigm you can replicate.</div>
+  <div class="bento" id="bento"></div>
+  <div class="foot-note">Summaries are journalistic retellings of published work; always cite the original papers. Emotiv products are for research and personal use — not medical devices. Full literature: <a href="https://scholar.google.com/scholar?q=emotiv" target="_blank" rel="noopener" style="color:var(--muted)">Emotiv on Google Scholar ↗</a></div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true">
+  <div class="d-top"><span class="k" id="d-kicker">Peer-reviewed research</span><button class="d-close" id="d-close" aria-label="Close">✕</button></div>
+  <div class="d-scroll" id="d-body"></div>
+  <div class="d-foot" id="d-foot"></div>
+</aside>
+
+<script>
+const PX=(id,w=940,h=560)=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&dpr=1`;
+const SCHOLAR=q=>'https://scholar.google.com/scholar?q='+encodeURIComponent(q);
+const ARROW='<svg width="20" height="30" viewBox="0 0 20 30" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="1.5" x2="10" y2="18" stroke="#4f7cff" stroke-width="4" stroke-linecap="round"/><path d="M2.5 16.5 L10 28 L17.5 16.5 Z" fill="#4f7cff"/></svg>';
+
+const T=[
+{id:'debener',size:'s22',hot:true,img:PX(8533136,1200,900),yr:'2012',pill:'Landmark study',
+ title:'They took EEG for a walk — and it worked',cit:'Debener et al. · Psychophysiology',stat:'77% indoor · 69% outdoor single-trial P300 accuracy',
+ cite:'<b>Debener, S., Minow, F., Emkes, R., Gandras, K., & de Vos, M.</b> (2012). How about taking a low-cost, small, and wireless EEG for a walk? <i>Psychophysiology, 49</i>(11), 1617–1621.',
+ abstract:['Before this paper, serious EEG meant a shielded lab. Debener\'s group merged consumer Emotiv hardware with a standard electrode cap and sent participants walking across a university campus while running an auditory oddball task.','The mobile rig captured single-trial P300 responses at 77% classification accuracy indoors and 69% while walking outdoors — proof that meaningful ERP research survives the real world.'],
+ method:[['🎧','Modified EPOC rig','Consumer amp + standard EEG cap'],['🚶','Walk the campus','Auditory oddball during natural walking'],['📍','Time-locked tones','Standard vs deviant, marked'],['📊','Single-trial P300','Classify indoors vs outdoors']],
+ findings:['Single-trial P300 classified at <b>77% indoors, 69% walking outdoors</b>','Signal quality remained research-usable during natural movement','Kickstarted the entire mobile-EEG field — a thousand field studies followed'],
+ why:'Every out-of-lab recording you make in Studio stands on this result. Your headset is the descendant of this rig, minus the duct tape.',
+ rep:{label:'Replicate: auditory oddball',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the paper','Psychophysiology (Wiley)','https://onlinelibrary.wiley.com/doi/10.1111/j.1469-8986.2012.01471.x'],['🎓','Google Scholar','Citations & related work',SCHOLAR('Debener taking low-cost wireless EEG for a walk')]]},
+
+{id:'badcock',size:'s21',img:PX(128611,1200,620),yr:'2013',pill:'Validation',
+ title:'The gaming headset that matched the lab rig',cit:'Badcock et al. · PeerJ',stat:'Late auditory ERPs comparable to research-grade EEG',
+ cite:'<b>Badcock, N. A., Mousikou, P., Mahajan, Y., de Lissa, P., Thie, J., & McArthur, G.</b> (2013). Validation of the Emotiv EPOC® EEG gaming system for measuring research quality auditory ERPs. <i>PeerJ, 1</i>, e38.',
+ abstract:['Can a consumer headset measure the same brain responses as equipment costing fifty times more? Badcock\'s team recorded late auditory ERPs with an EPOC and a research-grade Neuroscan system on the same adults.','The EPOC\'s waveforms were statistically comparable for the components tested — the paper that gave hundreds of labs permission to run affordable ERP studies. A follow-up validated the approach in children.'],
+ method:[['🔀','Head-to-head','EPOC vs research-grade system'],['🔔','Auditory tones','Same paradigm, same participants'],['📈','Compare ERPs','Late auditory components'],['✅','Statistical equivalence','Reliability analysis']],
+ findings:['Late auditory ERPs from EPOC were <b>comparable to a lab-grade system</b>','Follow-up (2015) extended validation to children','One of the most-cited Emotiv validation papers'],
+ why:'When you record an ERP experiment in Studio, this is the evidence your data can be publication-worthy.',
+ rep:{label:'Replicate: auditory oddball',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the paper','PeerJ (open access)','https://peerj.com/articles/38/'],['🎓','Google Scholar','Citations & related work',SCHOLAR('Badcock Validation Emotiv EPOC auditory ERPs PeerJ')]]},
+
+{id:'stopczynski',size:'s12',img:PX(839465,900,1200),yr:'2014',pill:'Methods first',
+ title:'A brain scanner in your pocket',cit:'Stopczynski et al. · PLOS ONE',stat:'Real-time 3D brain imaging on a smartphone',
+ cite:'<b>Stopczynski, A., Stahlhut, C., Larsen, J. E., Petersen, M. K., & Hansen, L. K.</b> (2014). The smartphone brain scanner: a portable real-time neuroimaging system. <i>PLOS ONE, 9</i>(2), e86733.',
+ abstract:['A Danish team wired an Emotiv headset to an ordinary smartphone and reconstructed 3D cortical activity in real time — a functional brain scanner that fits in a pocket.','Their open-source "Smartphone Brain Scanner" showed that meaningful source imaging doesn\'t need a mainframe, and became a foundation for portable neuroimaging.'],
+ method:[['🎧','EPOC 14-channel','Wireless EEG stream'],['📱','Smartphone compute','Real-time processing on-device'],['🧮','Source reconstruction','3D cortical activity estimate'],['🖥','Live visualisation','Brain activity rendered in real time']],
+ findings:['<b>Real-time 3D source imaging</b> achieved on 2014 phone hardware','Fully open-source pipeline, widely reused','Made "neuroimaging anywhere" a practical claim'],
+ why:'The live views in Studio and BrainViz follow the trail this project blazed.',
+ rep:{label:'Try: live brainwaves',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the paper','PLOS ONE (open access)','https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0086733'],['🎓','Google Scholar','Citations & related work',SCHOLAR('smartphone brain scanner portable real-time neuroimaging')]]},
+
+{id:'duvinage',img:PX(582490),yr:'2013',pill:'Validation',
+ title:'P300 vs a medical device',cit:'Duvinage et al. · BioMed Eng OnLine',stat:'Consumer headset ran a working P300 BCI',
+ cite:'<b>Duvinage, M., Castermans, T., Petieau, M., Hoellinger, T., Cheron, G., & Dutoit, T.</b> (2013). Performance of the Emotiv Epoc headset for P300-based applications. <i>BioMedical Engineering OnLine, 12</i>, 56.',
+ abstract:['This Belgian team benchmarked the EPOC against a medical-grade EEG system on the P300 paradigm — the signal behind brain-spellers.','The verdict: lower signal-to-noise than the medical rig, as expected, but a genuinely working P300 system suitable for non-critical applications, at a fraction of the cost.'],
+ method:[['⚡','P300 paradigm','Oddball stimulation'],['🆚','EPOC vs medical EEG','Same subjects, both systems'],['📊','Compare accuracy','Classification performance'],['⚖','Honest verdict','Works, with known trade-offs']],
+ findings:['EPOC ran a <b>functional P300 BCI</b>','Medical system showed higher SNR — trade-off quantified honestly','Standard citation for "consumer EEG works, know your limits"'],
+ why:'A model of honest benchmarking — and the reason you can trust what a consumer headset can and can\'t do.',
+ rep:{label:'Replicate: P300 oddball',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the paper','BioMedical Engineering OnLine','https://link.springer.com/article/10.1186/1475-925X-12-56'],['🎓','Google Scholar','Citations & related work',SCHOLAR('Duvinage Performance Emotiv Epoc headset P300')]]},
+
+{id:'aspinall',size:'s21',img:PX(20367722,1200,620),yr:'2015',pill:'Field study',
+ title:'The urban brain: what green space does to your head',cit:'Aspinall et al. · Br. J. Sports Medicine',stat:'12 walkers · lower frustration in the park zone',
+ cite:'<b>Aspinall, P., Mavros, P., Coyne, R., & Roe, J.</b> (2015). The urban brain: analysing outdoor physical activity with mobile EEG. <i>British Journal of Sports Medicine, 49</i>(4), 272–276.',
+ abstract:['Twelve participants walked a fixed route through central Edinburgh — quiet streets, busy traffic, and a green park — wearing Emotiv headsets streaming emotional-state metrics as they moved.','Entering the green zone: frustration, engagement and arousal fell, meditation rose. Leaving it, engagement climbed again. City planners have been citing it ever since.'],
+ method:[['🗺','Fixed urban route','Quiet · busy · green zones'],['🎧','Mobile EEG walk','Metrics streamed while walking'],['📍','Zone transitions','Marked as they crossed'],['📊','Compare states','Emotional metrics per zone']],
+ findings:['<b>Lower frustration & arousal, higher meditation</b> in green space','Higher engagement when exiting the park','A founding study of "neurourbanism" — cited across planning & health'],
+ why:'Studio\'s metrics + offline recording make this study repeatable in your own city, this afternoon.',
+ rep:{label:'Try: field recording',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the paper','Br J Sports Medicine','https://bjsm.bmj.com/content/49/4/272'],['🎓','Google Scholar','Citations & related work',SCHOLAR('Aspinall urban brain outdoor physical activity mobile EEG')]]},
+
+{id:'devos',img:PX(8866720),yr:'2014',pill:'BCI milestone',
+ title:'A P300 speller you can walk away with',cit:'De Vos et al. · J. Neural Engineering',stat:'Mobile speller matched stationary amplifier',
+ cite:'<b>De Vos, M., Kroesen, M., Emkes, R., & Debener, S.</b> (2014). P300 speller BCI with a mobile EEG system: comparison to a traditional amplifier. <i>Journal of Neural Engineering, 11</i>(3), 036008.',
+ abstract:['The follow-up to the famous "walk" paper: a full P300 brain-speller running on the mobile Emotiv-based rig, benchmarked against a traditional stationary amplifier.','Spelling performance was comparable — turning "mobile EEG works" into "mobile BCI works," a key step toward communication tools that leave the lab.'],
+ method:[['⌨','P300 speller','Letter grid, flashing'],['🎒','Mobile rig','Emotiv-based wireless system'],['🆚','Vs stationary amp','Same task benchmark'],['✅','Comparable spelling','Accuracy held up']],
+ findings:['Mobile speller accuracy <b>comparable to a stationary amplifier</b>','Demonstrated practical mobile communication BCI','Direct ancestor of accessible BCI communication tools'],
+ why:'The speller paradigm is buildable in Studio\'s Builder — flashing stimuli, auto-marked, ready to classify.',
+ rep:{label:'Replicate: P300 oddball',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the paper','J. Neural Engineering','https://ui.adsabs.harvard.edu/abs/2014JNEng..11c6008D/abstract'],['🎓','Google Scholar','Citations & related work',SCHOLAR('De Vos P300 speller mobile EEG comparison traditional amplifier')]]},
+
+{id:'khushaba',img:PX(5208874),yr:'2013',pill:'Neuromarketing',
+ title:'Watching the brain choose crackers',cit:'Khushaba et al. · Expert Systems w/ Applications',stat:'EEG + eye tracking during real shopping choices',
+ cite:'<b>Khushaba, R. N., Wise, C., Kodagoda, S., Louviere, J., Kahn, B. E., & Townsend, C.</b> (2013). Consumer neuroscience: Assessing the brain response to marketing stimuli using EEG and eye tracking. <i>Expert Systems with Applications, 40</i>(9), 3803–3812.',
+ abstract:['Participants chose between crackers varying in shape, flavour and topping while an EPOC recorded their brains and an eye tracker followed their gaze.','Spectral changes in frontal and occipital regions tracked preference as decisions formed — one of the founding demonstrations of consumer neuroscience with portable EEG.'],
+ method:[['🛒','Choice task','Cracker options on screen'],['🎧','EPOC + eye tracking','Synchronized streams'],['📊','Spectral analysis','Band power during decisions'],['🧠','Preference signals','Frontal/occipital changes']],
+ findings:['Brain activity <b>tracked preferences during live choices</b>','EEG + gaze fusion outperformed either alone','Blueprint for the ad-testing industry Studio now serves'],
+ why:'This is Studio\'s home turf: run the same logic on your own products with the media-test template.',
+ rep:{label:'Try: A/B media test',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the paper','Expert Systems with Applications',SCHOLAR('Khushaba consumer neuroscience EEG eye tracking crackers')],['🎓','Google Scholar','Citations & related work',SCHOLAR('Khushaba consumer neuroscience EEG eye tracking')]]},
+
+{id:'drowsy',img:PX(771317),yr:'2020',pill:'Systematic review',
+ title:'Can cheap EEG catch drowsy drivers?',cit:'Systematic review · low-cost EEG headsets',stat:'EPOC & Insight across the fatigue-detection literature',
+ cite:'<b>LaRocco, J., Le, M. D., & Paeng, D.-G.</b> (2020). A systemic review of available low-cost EEG headsets used for drowsiness detection. <i>Frontiers in Neuroinformatics, 14</i>, 553352.',
+ abstract:['Drowsiness kills on roads and in control rooms. This review surveyed the field\'s attempts to detect it with affordable headsets — Emotiv EPOC and Insight prominent among them.','Across studies, spectral features from consumer EEG classified fatigue well enough to matter, mapping both the promise and the open problems of real-world alertness monitoring.'],
+ method:[['📚','Field survey','Dozens of drowsiness studies'],['🎧','Consumer headsets','EPOC, Insight, and peers'],['📊','Spectral features','Theta/alpha shifts with fatigue'],['⚖','Compare accuracy','Methods and gaps mapped']],
+ findings:['Consumer EEG <b>detects drowsiness signatures</b> usable for alerting','EPOC and Insight appear throughout the literature','Open challenges: individual calibration, motion, real-road validation'],
+ why:'The attention-powered car wasn\'t a gimmick — it sits on this literature. Your headset streams the same signals.',
+ rep:{label:'Try: focus vs rest',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the review','PMC (open access)','https://pmc.ncbi.nlm.nih.gov/articles/PMC7593569/'],['🎓','Google Scholar','Citations & related work',SCHOLAR('systemic review low-cost EEG headsets drowsiness detection')]]},
+
+{id:'adhd',img:PX(4218027),yr:'2017',pill:'Applied study',
+ title:'A VR game that trains attention',cit:'Alchalabi et al. · IEEE',stat:'Focus gains reported with EEG-controlled gameplay',
+ cite:'<b>Alchalabi, A. E., Elsharnouby, M., Shirmohammadi, S., & Eddin, A. N.</b> (2017). FOCUS: Detecting ADHD patients by an EEG-based serious game. <i>IEEE Transactions on Instrumentation and Measurement / conference work</i>.',
+ abstract:['Researchers built a virtual-reality serious game controlled by an EPOC+ headset, exploring EEG-based training and detection for attention-deficit profiles.','Players steered gameplay with their measured focus; the team reported measurable focus improvements across training sessions in healthy users — an early template for neurofeedback gaming.'],
+ method:[['🎮','Serious game + VR','Gameplay bound to focus'],['🎧','EPOC+ control','Attention drives the game'],['🔁','Training sessions','Repeated play protocols'],['📈','Measure change','Focus metrics across sessions']],
+ findings:['Gameplay controllable by <b>measured attention alone</b>','Reported focus gains across training sessions','Early, influential template for neurofeedback games'],
+ why:'The same loop — metric in, gameplay out — is exactly what Cortex\'s met stream gives you to build with.',
+ rep:{label:'Try: attention metric',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Find the paper','Via Google Scholar',SCHOLAR('Alchalabi EEG serious game ADHD EPOC focus')],['🎓','Google Scholar','Citations & related work',SCHOLAR('EEG serious game ADHD neurofeedback Emotiv')]]},
+
+{id:'review',img:PX(4031654),yr:'2020',pill:'Scoping review',
+ title:'Ten years of EPOC, on the record',cit:'Williams et al. · scoping review',stat:'Hundreds of peer-reviewed EPOC studies mapped',
+ cite:'<b>Williams, N. S., McArthur, G. M., & Badcock, N. A.</b> (2020). 10 years of EPOC: A scoping review of Emotiv\'s portable EEG device. <i>bioRxiv</i>.',
+ abstract:['A decade after the EPOC shipped, the team behind the original validation papers mapped everything published with it: hundreds of studies across ERP research, BCI, cognition, clinical pilots and beyond.','The review catalogues where the device performed, where it struggled, and how a consumer gadget quietly became standard scientific equipment.'],
+ method:[['🔎','Systematic search','A decade of EPOC literature'],['🗂','Categorize studies','ERP · BCI · applied · clinical'],['⚖','Assess quality','Methods and outcomes'],['🗺','Map the field','Where portable EEG works']],
+ findings:['<b>Hundreds of peer-reviewed studies</b> used EPOC in its first decade','Strongest evidence: late ERPs, band-power paradigms, BCI','A consumer device became standard lab equipment'],
+ why:'If you want to know whether your study idea has been tried with a headset like yours — start here.',
+ rep:{label:'Start: record & export',href:'emotiv-studio-experiments.html'},
+ links:[['📄','Read the review','bioRxiv (open access)','https://www.biorxiv.org/content/10.1101/2020.07.14.202085v1.full.pdf'],['🎓','Google Scholar','Citations & related work',SCHOLAR('10 years of EPOC scoping review Emotiv portable EEG')]]}
+];
+
+const ORDER=['debener','badcock','stopczynski','duvinage','aspinall','devos','khushaba','drowsy','adhd','review'];
+
+const bento=document.getElementById('bento');
+ORDER.map(id=>T.find(t=>t.id===id)).forEach(t=>{
+  const b=document.createElement('button');
+  b.className='tile '+(t.size||'');
+  let h='<img class="bgimg" src="'+t.img+'" alt="" loading="lazy"><div class="scrim"></div><div class="inner">';
+  h+='<div class="toprow"><span class="pill'+(t.hot?' hot':'')+'">'+t.pill+'</span><span class="yr">'+t.yr+'</span></div>';
+  h+='<div><h3>'+t.title+'</h3><div class="cit">'+t.cit+'</div>'+(t.stat?'<div class="stat">'+t.stat+'</div>':'')+'</div></div>';
+  b.innerHTML=h;
+  b.addEventListener('click',()=>openReport(t));
+  bento.appendChild(b);
+});
+
+const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop'),
+ dBody=document.getElementById('d-body'),dFoot=document.getElementById('d-foot');
+function flowHTML(nodes){
+  let h='<div class="flow">';
+  nodes.forEach((n,i)=>{h+='<div class="fnode"><div class="fi">'+n[0]+'</div><div class="ft"><b>'+n[1]+'</b><span>'+n[2]+'</span></div></div>';if(i<nodes.length-1)h+='<div class="fconn">'+ARROW+'</div>';});
+  return h+'</div>';
+}
+function openReport(t){
+  let h='<div class="d-hero" style="background-image:url('+t.img+')"></div>';
+  h+='<h2>'+t.title+'</h2>';
+  h+='<div class="citebox">'+t.cite+'</div>';
+  h+='<div class="sect sci">In brief</div>';
+  t.abstract.forEach(p=>h+='<p>'+p+'</p>');
+  h+='<div class="sect sci">Method</div>'+flowHTML(t.method);
+  h+='<div class="sect sci">Key findings</div><ul class="plain">'+t.findings.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+  h+='<div class="sect sci">Why it matters for you</div><p>'+t.why+'</p>';
+  h+='<div class="sect sci">Paper & citations</div><div class="docs">'+t.links.map(d=>'<a href="'+d[3]+'" target="_blank" rel="noopener"><span class="di">'+d[0]+'</span><span class="dt">'+d[1]+'<span>'+d[2]+'</span></span><span class="dx">↗</span></a>').join('')+'</div>';
+  dBody.innerHTML=h;
+  dFoot.innerHTML='<a class="cta" href="'+t.rep.href+'">'+t.rep.label+' →</a><a class="srclink" href="'+SCHOLAR('emotiv '+t.cit)+'" target="_blank" rel="noopener">Find more like this on Google Scholar ↗</a>';
+  drawer.classList.add('on');backdrop.classList.add('on');dBody.scrollTop=0;
+}
+function closeDrawer(){drawer.classList.remove('on');backdrop.classList.remove('on');}
+document.getElementById('d-close').addEventListener('click',closeDrawer);
+backdrop.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotiv Studio — Experiments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0b;--panel:#141416;--line:#26262a;--text:#f4f4f5;--muted:#9b9ba3;--dim:#66666e;--accent:#ff5c1a;--r:22px;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  a{color:inherit}
+  .stage{max-width:1280px;margin:0 auto;padding:34px 40px 80px}
+  .tabs{display:flex;gap:6px;margin-bottom:30px}
+  .tab{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:11px;font-size:13.5px;font-weight:600;color:var(--muted);transition:all .15s;text-decoration:none}
+  .tab:hover{color:var(--text);background:var(--panel)}
+  .tab.on{background:var(--panel);color:#fff}
+  .tab .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .wordmark{font-size:13px;font-weight:800;letter-spacing:.22em;color:var(--dim)}
+  .head h1{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.02em}
+  .head-sub{color:var(--muted);font-size:15px;margin-bottom:30px;max-width:640px}
+
+  .bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:212px;gap:16px;grid-auto-flow:dense}
+  @media(max-width:1080px){.bento{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.bento{grid-template-columns:1fr}}
+  .tile{position:relative;border-radius:var(--r);overflow:hidden;text-align:left;background:var(--panel);isolation:isolate;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s}
+  .tile:hover{transform:scale(1.018);box-shadow:0 18px 50px rgba(0,0,0,.55);z-index:2}
+  .tile:active{transform:scale(.995)}
+  .tile.s22{grid-column:span 2;grid-row:span 2}
+  .tile.s21{grid-column:span 2}
+  .tile.s12{grid-row:span 2}
+  @media(max-width:560px){.tile.s22,.tile.s21{grid-column:span 1}}
+  .tile .bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .tile:hover .bgimg{transform:scale(1.05)}
+  .tile .scrim{position:absolute;inset:0;z-index:0}
+  .tile .inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:18px 20px}
+  .toprow{display:flex;align-items:center;gap:8px}
+  .pill{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border-radius:99px;background:rgba(10,10,12,.5);backdrop-filter:blur(8px);color:#fff}
+  .pill.starter{background:var(--accent)}
+  .dur{margin-left:auto;font-size:11px;font-weight:600;color:#fff;background:rgba(10,10,12,.45);padding:5px 10px;border-radius:99px;backdrop-filter:blur(8px)}
+  .tile h3{font-size:19px;font-weight:800;line-height:1.22;letter-spacing:-.01em;text-shadow:0 2px 16px rgba(0,0,0,.65)}
+  .tile.s22 h3{font-size:29px}.tile.s21 h3{font-size:22px}
+  .tile .sub{font-size:12.5px;color:rgba(255,255,255,.85);margin-top:6px;font-weight:500;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+
+  /* drawer */
+  .backdrop{position:fixed;inset:0;background:rgba(5,5,7,.62);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .28s;z-index:40}
+  .backdrop.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(510px,100%);background:#101013;border-left:1px solid var(--line);transform:translateX(102%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:50;display:flex;flex-direction:column}
+  .drawer.on{transform:translateX(0)}
+  .d-top{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line);min-height:56px}
+  .d-top .k{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  .d-back{display:none;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel);transition:all .15s}
+  .d-back:hover{color:#fff;border-color:var(--muted)}
+  .d-back.show{display:inline-flex}
+  .d-close{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:15px;transition:all .15s;flex:none}
+  .d-close:hover{color:#fff;border-color:var(--muted)}
+  .d-scroll{overflow-y:auto;flex:1;padding:24px 26px 30px}
+  .d-hero{height:120px;border-radius:14px;margin-bottom:18px;background-size:cover;background-position:center;position:relative;overflow:hidden}
+  .d-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(6,6,8,.1),rgba(6,6,8,.62))}
+  .d-scroll h2{font-size:24px;font-weight:800;line-height:1.22;letter-spacing:-.015em;margin-bottom:14px}
+  .badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+  .badge{font-size:11px;font-weight:600;color:#d7d7de;background:var(--panel);border:1px solid var(--line);padding:6px 11px;border-radius:8px}
+  .badge b{color:var(--accent);font-weight:700}
+  .d-scroll p{font-size:14.5px;line-height:1.7;color:#c9c9d1;margin-bottom:14px}
+  .sect{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 0 11px}
+  .d-scroll ol.steps{list-style:none;counter-reset:s;margin-bottom:6px}
+  .d-scroll ol.steps li{position:relative;padding:9px 0 9px 36px;font-size:14px;line-height:1.6;color:#c9c9d1;counter-increment:s}
+  .d-scroll ol.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:23px;height:23px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .d-scroll ol.steps li code{background:#1c1c22;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;color:#ffb08a}
+  .expect{display:flex;gap:11px;align-items:flex-start;background:rgba(255,92,26,.08);border:1px solid rgba(255,92,26,.22);border-radius:12px;padding:14px 15px;margin-top:4px}
+  .expect .e-t{font-size:13.5px;line-height:1.55;color:#e7d9cf}
+  /* flow */
+  .flow{margin:6px 0 4px}
+  .fnode{position:relative;display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .fconn{height:36px;width:34px;margin-left:14px;display:flex;align-items:center;justify-content:center}
+  .fconn svg{display:block;filter:drop-shadow(0 0 7px rgba(255,92,26,.55))}
+  .fnode .fi{width:34px;height:34px;flex:none;border-radius:9px;background:rgba(255,92,26,.14);color:#ffb08a;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+  .fnode .ft b{font-size:13.5px;font-weight:700;display:block;line-height:1.3}
+  .fnode .ft span{font-size:12px;color:var(--muted);line-height:1.45;display:block;margin-top:2px}
+  .docs a{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;text-decoration:none;margin-bottom:8px;transition:all .15s;background:rgba(255,255,255,.015)}
+  .docs a:hover{border-color:var(--accent);background:rgba(255,92,26,.08)}
+  .docs a .di{font-size:15px}
+  .docs a .dt{flex:1;font-size:13.5px;font-weight:600;color:#e7e7ee}
+  .docs a .dt span{display:block;font-weight:400;font-size:11px;color:var(--dim)}
+  .docs a .dx{color:var(--dim);font-size:13px}
+  .d-foot{padding:15px 26px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:9px}
+  .cta{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:14px 20px;border-radius:12px;text-decoration:none;transition:all .15s;border:none;width:100%}
+  .cta:hover{background:#ff6e35;transform:translateY(-1px);box-shadow:0 8px 26px rgba(255,92,26,.4)}
+  .cta.ghost{background:var(--panel);border:1px solid var(--line);color:var(--text)}
+  .cta.ghost:hover{background:#1b1b20;box-shadow:none;border-color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <nav class="tabs">
+    <a class="tab" href="emotiv-studio-home.html"><span>◐</span> Discover</a>
+    <a class="tab on" href="emotiv-studio-experiments.html"><span class="d"></span> Experiments</a>
+    <a class="tab" href="emotiv-studio-quest.html"><span>◇</span> Brain Quest</a>
+    <a class="tab" href="emotiv-studio-research.html"><span>◎</span> Research</a>
+  </nav>
+  <div class="head"><span class="wordmark">EMOTIV STUDIO</span><h1>Set up an experiment</h1></div>
+  <div class="head-sub">Ready-to-run templates — from the 3-minute "hello world" of EEG to real ERP and BCI paradigms. Pick one, hit Set up, follow the flow.</div>
+  <div class="bento" id="bento"></div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true">
+  <div class="d-top">
+    <button class="d-back" id="d-back">‹ Back</button>
+    <span class="k" id="d-kicker"></span>
+    <button class="d-close" id="d-close" aria-label="Close">✕</button>
+  </div>
+  <div class="d-scroll" id="d-body"></div>
+  <div class="d-foot" id="d-foot"></div>
+</aside>
+
+<script>
+const PX=(id,w=940,h=560)=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&dpr=1`;
+const SCR={teal:'linear-gradient(183deg,rgba(6,20,18,.25),rgba(4,40,36,.82))',slate:'linear-gradient(183deg,rgba(10,12,18,.2),rgba(10,14,22,.85))',violet:'linear-gradient(183deg,rgba(20,10,40,.25),rgba(30,12,60,.82))',orange:'linear-gradient(183deg,rgba(40,15,4,.2),rgba(60,25,8,.82))',red:'linear-gradient(183deg,rgba(40,8,8,.2),rgba(70,12,12,.82))',green:'linear-gradient(183deg,rgba(6,30,22,.2),rgba(4,50,36,.82))',pink:'linear-gradient(183deg,rgba(40,10,44,.25),rgba(60,12,66,.82))',blue:'linear-gradient(183deg,rgba(8,20,40,.2),rgba(10,30,60,.82))'};
+
+/* shared docs */
+const D_REC=[['📊','EmotivPRO manual','Record, mark, view','https://emotiv.gitbook.io/emotivpro-v3/'],['〰','EEG bands glossary','What each band means','https://www.emotiv.com/blogs/glossary'],['🔗','Lab Streaming Layer','Sync with other tools','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl']];
+const D_ERP=[['🧱','EmotivPRO Builder','Build stimulus phases','https://emotiv.gitbook.io/emotivpro-builder/'],['📈','ERP tutorial','Marking a brain response','https://www.emotiv.com/blog/basics-of-event-related-potentials'],['🔬','Analyzer manual','Average epochs → ERP','https://emotiv.gitbook.io/emotivpro-analyzer/']];
+const D_MET=[['📡','Cortex — Data subscription','met (Performance Metrics)','https://emotiv.gitbook.io/cortex-api/data-subscription'],['📊','EmotivPRO','Live metrics + recording','https://www.emotiv.com/emotivpro']];
+const D_BCI=[['⌘','Cortex — Advanced BCI','Read commands in code','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['📡','Cortex — Data subscription','pow / FFT','https://emotiv.gitbook.io/cortex-api/data-subscription'],['▶','Emotiv Academy','BCI build videos','https://www.youtube.com/@EmotivAcademy']];
+
+const T=[
+{id:'alpha',size:'s22',img:PX(14776509,1200,900),scr:SCR.teal,pill:'Start here',starter:true,dur:'3 min',
+  title:'Alpha Waves: eyes open vs eyes closed',sub:'The "hello world" of EEG — a real brain signal on your first try',kicker:'Experiment',hero:PX(14776509),
+  badges:['⏱ <b>3 min</b>','◔ Beginner','🎧 Any headset','📊 Band power'],
+  body:['The alpha rhythm (8–12 Hz) over the back of your head jumps up the moment you close your eyes and drops when you open them. It\'s the one brain signal you can see raw — no averaging, no stimulus rig. Run this in your first ten minutes.'],
+  expect:'A clear rise in alpha band power during every eyes-closed block — often visible to the naked eye.',
+  flow:[['🎧','Fit + green contacts','Open the FFT / band-power view'],['👁','Eyes OPEN 30 s','Marker, sit still'],['😌','Eyes CLOSED 30 s','Marker, stay relaxed'],['🔁','Repeat 3–4×','Then stop'],['📊','Compare alpha','Closed vs open blocks']],
+  steps:['Fit your headset until every sensor shows green','Open a new recording and switch on the FFT / band-power view','Add a marker, then sit with eyes OPEN and still for 30 s','Add a marker and close your eyes for 30 s','Repeat 3–4×, then compare alpha between the blocks'],
+  docs:D_REC},
+{id:'record',img:PX(7681111),scr:SCR.slate,pill:'Getting started',dur:'2 min',
+  title:'Record your first session',sub:'The move every experiment is built on',kicker:'Getting started',hero:PX(7681111),
+  badges:['⏱ <b>2 min</b>','◔ Beginner','🎧 Any headset'],
+  body:['Before any experiment you need a clean recording with markers you can trust. This loop becomes muscle memory fast.'],
+  expect:'A saved, time-marked EEG file you can replay, export, or feed into any template here.',
+  flow:[['🔗','Pair','Launcher + green contacts'],['⦿','Record','Press record in Studio'],['📍','Mark','Drop markers at each event'],['☁','Save','Syncs to EMOTIV Cloud']],
+  steps:['Pair the headset in the Launcher and confirm green contact quality','Open Studio and press Record','Drop an event marker whenever something happens','Stop when done; the session saves to Cloud','Re-open it to scrub the raw EEG and your markers'],
+  docs:D_REC},
+{id:'bands',img:PX(247676),scr:SCR.blue,pill:'Getting started',dur:'read',
+  title:'Read your brainwaves',sub:'Delta to gamma, in plain terms',kicker:'Getting started',hero:PX(247676),
+  badges:['📖 Explainer','🎧 Any headset','📊 Band power'],
+  body:['Studio splits your EEG into frequency bands, live. Knowing what each tends to mean makes every other experiment readable.'],
+  expect:'A live spectrum you can watch shift as you blink, relax, concentrate, or close your eyes.',
+  flow:[['δ','Delta 1–4 Hz','Deep sleep'],['θ','Theta 4–8 Hz','Drowsy, deep focus'],['α','Alpha 8–12 Hz','Relaxed, eyes closed'],['β','Beta 12–30 Hz','Alert, thinking'],['γ','Gamma 30 Hz+','Fast binding']],
+  steps:['Open the live band-power view in Studio','Relax with eyes closed and watch alpha rise','Open your eyes — watch it drop and beta grow','Blink hard — see the artifact spike','Note how each state moves the spectrum'],
+  docs:D_REC},
+{id:'meditation',size:'s12',img:PX(14864078,900,1200),scr:SCR.green,pill:'Neurofeedback',dur:'10 min',
+  title:'Watch your own calm rise',sub:'Meditation as a live feedback loop',kicker:'Experiment',hero:PX(14864078),
+  badges:['⏱ <b>10 min</b>','◔ Beginner','🎧 Insight / MN8','📊 Band power + Relaxation'],
+  body:['Alpha and theta tend to climb as you settle and turn attention inward. Put that on screen and meditation becomes a closed loop — you can see the state you\'re reaching for.'],
+  expect:'A gradual upward drift in alpha/theta and the Relaxation metric — with marker points where your mind wandered.',
+  flow:[['📡','Metrics on','Band power + Relaxation'],['🧘','Breathe 10 min','Eyes closed'],['📍','Mark drifts','When your mind wanders'],['📈','Review','Watch calm climb']],
+  steps:['Open the live band-power and Performance Metrics view','Press Record and close your eyes','Follow your breath for 10 minutes','Drop a marker each time your mind wandered','Review how alpha/theta and Relaxation drifted'],
+  docs:D_MET.concat([D_REC[2]])},
+{id:'focus',img:PX(771317),scr:SCR.orange,pill:'Performance metric',dur:'6 min',
+  title:'Focus vs rest',sub:'Prove the Attention metric on yourself',kicker:'Experiment',hero:PX(771317),
+  badges:['⏱ <b>6 min</b>','◔ Beginner','🎧 Any headset','📊 Attention'],
+  body:['Emotiv\'s Attention metric should rise when you concentrate and fall when you drift. Don\'t take our word for it — make it move.'],
+  expect:'Higher Attention during the effortful blocks and a visible drop during rest — your own labelled proof.',
+  flow:[['📡','Attention on','Performance Metrics'],['😌','Rest 1 min','Marker'],['🧮','Hard task 1 min','Arithmetic / dense reading — marker'],['🔁','Repeat','2–3 cycles'],['📈','Compare','Attention across blocks']],
+  steps:['Open Performance Metrics and press Record','Relax 1 minute, thinking of nothing (marker)','Do 1 minute of hard mental arithmetic (marker)','Repeat the cycle two or three times','Compare the Attention trace across blocks'],
+  docs:D_MET},
+{id:'p300',size:'s21',img:PX(582490,1200,620),scr:SCR.violet,pill:'Classic ERP',dur:'20 min',
+  title:'The P300 oddball',sub:'The brain\'s "wait, that\'s different!" — engine behind BCI spellers',kicker:'Experiment',hero:PX(582490),
+  badges:['⏱ <b>20 min</b>','◑ Intermediate','🎧 EPOC X / FLEX','📈 ERP'],
+  body:['Show a steady stream of frequent "standard" images with occasional rare "targets." ~300 ms after each rare target, the brain fires a positive bump — the P300, the workhorse of BCI spellers.'],
+  expect:'A positive deflection ~300 ms after targets, absent (or much smaller) for standards.',
+  flow:[['🧱','Builder stimuli','Standard 80% · target 20%'],['🔀','Randomize','~200 ms flash, ~1 s gap'],['📍','Mark targets','Auto-marked onsets'],['⦿','Record ~150','Trials'],['🔬','Average','Target vs standard in Analyzer']],
+  steps:['In Builder, create a stimuli phase','Add a standard set (~80%) and a target set (~20%), randomized','Flash each ~200 ms with a ~1 s gap; aim for ~150 trials','Let Builder mark every target onset','Average target vs standard epochs in Analyzer'],
+  docs:D_ERP},
+{id:'resting',img:PX(1093199),scr:SCR.teal,pill:'Baseline',dur:'5 min',
+  title:'Your resting-state fingerprint',sub:'Five quiet minutes = your reference',kicker:'Experiment',hero:PX(1093199),
+  badges:['⏱ <b>5 min</b>','◔ Beginner','🎧 Any headset','📊 Band power'],
+  body:['Five minutes, eyes closed, doing nothing, becomes your personal band-power baseline — the reference every other session compares against.'],
+  expect:'A stable personal spectrum you can re-measure on other days to see how sleep, caffeine or stress shift it.',
+  flow:[['🎧','Fit + record','Press record'],['📍','"rest start"','Marker'],['🌊','5 min still','Eyes closed, awake'],['📊','Note averages','Alpha / theta / beta']],
+  steps:['Fit the headset and press Record','Drop a "rest start" marker','Sit still, eyes closed, relaxed but awake, 5 minutes','Drop a "rest end" marker and stop','Note your average alpha / theta / beta'],
+  docs:D_REC},
+{id:'stroop',img:PX(30727825),scr:SCR.red,pill:'Cognitive stress',dur:'10 min',
+  title:'The Stroop test',sub:'Name the ink, not the word',kicker:'Experiment',hero:PX(30727825),
+  badges:['⏱ <b>10 min</b>','◑ Intermediate','🎧 Any headset','📊 Cognitive Stress'],
+  body:['Read the word "RED" printed in blue ink and name the ink. The conflict slows you down and nudges your Cognitive Stress metric — a 90-year-old classic on your own head.'],
+  expect:'Higher Cognitive Stress and slower responses on incongruent trials — the textbook Stroop effect.',
+  flow:[['🧱','Builder text','Congruent + incongruent'],['🔀','Randomize','~40 trials, key response'],['📊','Stress on','Cognitive Stress metric'],['📈','Compare','Congruent vs incongruent']],
+  steps:['In Builder, make text stimuli: congruent (word = ink) and incongruent (word ≠ ink)','Randomize, ~40 trials, respond by key for the ink colour','Turn on the Cognitive Stress metric and record','Compare stress and reaction time between conditions'],
+  docs:[['🧱','EmotivPRO Builder','Text stimuli','https://emotiv.gitbook.io/emotivpro-builder/']].concat(D_MET)},
+{id:'music',img:PX(13230484),scr:SCR.pink,pill:'Neuromarketing',dur:'12 min',
+  title:'Music & emotion',sub:'Your brain\'s honest review',kicker:'Experiment',hero:PX(13230484),
+  badges:['⏱ <b>12 min</b>','◔ Beginner','🎧 Any headset','📊 Engagement + Interest'],
+  body:['Play a few contrasting tracks and watch Engagement and Interest move — the same method brands use to test ads before spending millions.'],
+  expect:'A distinct engagement / interest curve per track — your brain reacting before your opinions catch up.',
+  flow:[['🧱','Builder clips','3–5 audio/video, 30–60 s'],['🔀','Randomize','Short rest between'],['📡','Metrics on','Record'],['📈','Compare','Signature per clip']],
+  steps:['In Builder, add 3–5 audio or video clips, 30–60 s each','Randomize order with a short rest between','Record with Performance Metrics on','Compare metric signatures clip by clip'],
+  docs:[['🧱','EmotivPRO Builder','Media stimuli','https://emotiv.gitbook.io/emotivpro-builder/'],['🛒','Consumer research','Neuromarketing method','https://www.emotiv.com/neuromarketing']].concat([D_MET[0]])},
+{id:'n170',img:PX(17842139),scr:SCR.violet,pill:'Classic ERP',dur:'25 min',
+  title:'Faces vs objects (N170)',sub:'Your brain\'s face detector',kicker:'Experiment',hero:PX(17842139),
+  badges:['⏱ <b>25 min</b>','◑ Intermediate','🎧 EPOC X / FLEX','📈 ERP'],
+  body:['Human faces trigger a negative ERP ~170 ms over right-temporal scalp, larger than for objects. One of the most reliable effects in all of EEG.'],
+  expect:'A bigger negative peak ~170 ms for faces than objects, strongest over right-temporal sensors.',
+  flow:[['🧱','Builder stimuli','Faces + objects'],['🔀','Randomize','~100 each, ~300 ms'],['📍','Mark onsets','Every image'],['🔬','Average','Faces vs objects']],
+  steps:['In Builder, build a stimuli phase with two image sets: faces and objects','Randomize, ~100 per set, each ~300 ms','Mark every image onset','Average face vs object epochs in Analyzer'],
+  docs:D_ERP},
+{id:'ssvep',img:PX(35231160),scr:SCR.blue,pill:'BCI paradigm',dur:'15 min',
+  title:'SSVEP: a BCI in one trick',sub:'Stare at a flicker, read it in the EEG',kicker:'Experiment',hero:PX(35231160),
+  badges:['⏱ <b>15 min</b>','◑ Intermediate','🎧 EPOC X / FLEX','📊 FFT'],
+  body:['Stare at a 10 Hz flicker and your visual cortex hums back at 10 Hz. Flash two boxes at different rates and the EEG reveals which you\'re looking at — a whole BCI in one effect.'],
+  expect:'A sharp spectral spike at exactly the flicker frequency you attended — switch boxes and the peak moves.',
+  flow:[['🧱','Two flickers','e.g. 8.57 Hz + 12 Hz'],['👁','Stare 15 s','Box A (marker)'],['👁','Stare 15 s','Box B (marker)'],['📊','FFT','Find the matching peak']],
+  steps:['In Builder, create two flickering stimuli — e.g. 8.57 Hz and 12 Hz','Record 15 s staring at the first box (marker), then the second (marker)','Open the FFT view','Find the spectral peak matching the box you watched'],
+  docs:D_BCI},
+{id:'motor',img:PX(6141336),scr:SCR.blue,pill:'BCI paradigm',dur:'20 min',
+  title:'Motor imagery: left vs right',sub:'The raw material behind Mental Commands',kicker:'Experiment',hero:PX(6141336),
+  badges:['⏱ <b>20 min</b>','◕ Advanced','🎧 EPOC X / FLEX','📊 Mu / beta'],
+  body:['Imagine squeezing your left hand, then your right. Activity over the opposite side of motor cortex drops — "desynchronizes." This side-specific dip is exactly what powers a Mental Command.'],
+  expect:'Mu/beta suppression on the hemisphere opposite the imagined hand — left over right, and vice versa.',
+  flow:[['⦿','Record','Cue yourself'],['✊','Imagine LEFT 4 s','Marker, rest 4 s'],['🤚','Imagine RIGHT 4 s','Marker, rest 4 s'],['🔁','~30 each','Per side'],['📊','Compare','Mu/beta over C3 vs C4']],
+  steps:['Press Record','Imagine LEFT-hand squeezing 4 s (marker), rest 4 s','Imagine RIGHT-hand squeezing 4 s (marker), rest 4 s','Collect ~30 trials per side','Compare mu/beta (8–30 Hz) over C3 vs C4'],
+  docs:[['⌘','Cortex — Advanced BCI','From imagery to command','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['✦','EmotivBCI','Train it as a command','https://emotiv.gitbook.io/emotivbci/']].concat([D_BCI[2]])},
+{id:'export',img:PX(2004161),scr:SCR.slate,pill:'Getting started',dur:'read',
+  title:'Export & analyze anywhere',sub:'EDF, CSV, LSL, EEGLAB, MATLAB, PsychoPy',kicker:'Getting started',hero:PX(2004161),
+  badges:['📖 Explainer','🎧 Any headset','🔗 LSL'],
+  body:['Studio is a comfortable home for your data, but it doesn\'t trap it. Everything you record can leave for the analysis stack you already trust.'],
+  expect:'Your sessions, portable — ready for anything from a quick spreadsheet to a full MATLAB workup.',
+  flow:[['⤓','Export','EDF or CSV'],['🔗','Stream','LSL to other devices'],['🧩','PsychoPy','Timed stimulus markers'],['🧪','Analyse','EEGLAB / MATLAB / MNE']],
+  steps:['Export recordings as EDF or CSV from the viewer','Stream live over Lab Streaming Layer (LSL)','Pipe markers from PsychoPy for tight timing','Load exports into EEGLAB, MATLAB, or MNE-Python'],
+  docs:[['🔗','Lab Streaming Layer','Sync multiple streams','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl'],['🛠','Emotiv developer','SDKs + docs','https://www.emotiv.com/developer'],['📊','EmotivPRO manual','Export formats','https://emotiv.gitbook.io/emotivpro-v3/']]},
+{id:'oddball',img:PX(128611),scr:SCR.violet,pill:'Classic ERP',dur:'20 min',
+  title:'Auditory oddball (MMN)',sub:'Your brain flags the odd note — even ignored',kicker:'Experiment',hero:PX(128611),
+  badges:['⏱ <b>20 min</b>','◑ Intermediate','🎧 EPOC X / FLEX','📈 ERP'],
+  body:['A steady beat of identical tones with the occasional off-pitch one. Your brain flags the violation ~150–250 ms later — the Mismatch Negativity — even when you\'re not listening.'],
+  expect:'A negative "mismatch" wave in the deviant-minus-standard difference, peaking ~150–250 ms.',
+  flow:[['🧱','Builder audio','Standard 80% · deviant 20%'],['🔔','~50 ms tones','~4 s apart, ~150 trials'],['📍','Mark onsets','Every tone'],['➖','Difference','Deviant − standard']],
+  steps:['In Builder, create an audio phase: standard tone 80%, deviant (different pitch) 20%','Play each ~50 ms, ~4 s apart, ~150 trials','Mark every tone onset','Average deviant vs standard, then subtract for the difference wave'],
+  docs:D_ERP}
+];
+
+const ORDER=['alpha','bands','resting','meditation','focus','record','stroop','p300','music','n170','ssvep','motor','export','oddball'];
+
+const bento=document.getElementById('bento');
+ORDER.map(id=>T.find(t=>t.id===id)).forEach(t=>{
+  const b=document.createElement('button');
+  b.className='tile '+(t.size||'');
+  let h='<img class="bgimg" src="'+t.img+'" alt="" loading="lazy"><div class="scrim" style="background:'+t.scr+'"></div><div class="inner">';
+  h+='<div class="toprow"><span class="pill'+(t.starter?' starter':'')+'">'+t.pill+'</span>'+(t.dur?'<span class="dur">'+t.dur+'</span>':'')+'</div>';
+  h+='<div><h3>'+t.title+'</h3>'+(t.sub?'<div class="sub">'+t.sub+'</div>':'')+'</div></div>';
+  b.innerHTML=h;
+  b.addEventListener('click',()=>openOverview(t));
+  bento.appendChild(b);
+});
+
+const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop'),
+ dBody=document.getElementById('d-body'),dFoot=document.getElementById('d-foot'),
+ dKicker=document.getElementById('d-kicker'),dBack=document.getElementById('d-back');
+let cur=null;
+
+const ARROW='<svg width="20" height="30" viewBox="0 0 20 30" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="1.5" x2="10" y2="18" stroke="#ff5c1a" stroke-width="4" stroke-linecap="round"/><path d="M2.5 16.5 L10 28 L17.5 16.5 Z" fill="#ff5c1a"/></svg>';
+function flowHTML(nodes){
+  let h='<div class="flow">';
+  nodes.forEach((n,i)=>{h+='<div class="fnode"><div class="fi">'+n[0]+'</div><div class="ft"><b>'+n[1]+'</b><span>'+n[2]+'</span></div></div>';if(i<nodes.length-1)h+='<div class="fconn">'+ARROW+'</div>';});
+  return h+'</div>';
+}
+function openOverview(t){
+  cur=t;dKicker.textContent=t.kicker;dBack.classList.remove('show');
+  let h='<div class="d-hero" style="background-image:url('+t.hero+')"></div><h2>'+t.title+'</h2>';
+  h+='<div class="badges">'+t.badges.map(x=>'<span class="badge">'+x+'</span>').join('')+'</div>';
+  (t.body||[]).forEach(p=>h+='<p>'+p+'</p>');
+  h+='<div class="sect">What you\'ll see</div><div class="expect"><span>✨</span><span class="e-t">'+t.expect+'</span></div>';
+  dBody.innerHTML=h;
+  dFoot.innerHTML='<button class="cta" id="setupbtn">Set up this experiment →</button>';
+  document.getElementById('setupbtn').addEventListener('click',()=>openGuide(t));
+  drawer.classList.add('on');backdrop.classList.add('on');dBody.scrollTop=0;
+}
+function openGuide(t){
+  dKicker.textContent='Set-up guide';dBack.classList.add('show');
+  let h='<h2>'+t.title+'</h2>';
+  h+='<div class="sect">The pipeline</div>'+flowHTML(t.flow);
+  h+='<div class="sect">Step by step</div><ol class="steps">'+t.steps.map(s=>'<li>'+s+'</li>').join('')+'</ol>';
+  h+='<div class="sect">What you\'ll see</div><div class="expect"><span>✨</span><span class="e-t">'+t.expect+'</span></div>';
+  h+='<div class="sect">Docs &amp; references</div><div class="docs">'+t.docs.map(d=>'<a href="'+d[3]+'" target="_blank" rel="noopener"><span class="di">'+d[0]+'</span><span class="dt">'+d[1]+'<span>'+d[2]+'</span></span><span class="dx">↗</span></a>').join('')+'</div>';
+  dBody.innerHTML=h;
+  dFoot.innerHTML='<a class="cta" href="https://emotiv.gitbook.io/emotivpro-builder/" target="_blank" rel="noopener">Open EmotivPRO Builder →</a><button class="cta ghost" id="backbtn">‹ Back to overview</button>';
+  document.getElementById('backbtn').addEventListener('click',()=>openOverview(cur));
+  dBody.scrollTop=0;
+}
+function closeDrawer(){drawer.classList.remove('on');backdrop.classList.remove('on');}
+dBack.addEventListener('click',()=>openOverview(cur));
+document.getElementById('d-close').addEventListener('click',closeDrawer);
+backdrop.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+</script>
+</body>
+</html>

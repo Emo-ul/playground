@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotiv Studio — Brain Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0b;--panel:#141416;--panel2:#1a1a1e;--line:#26262a;--text:#f4f4f5;--muted:#9b9ba3;--dim:#66666e;--accent:#ff5c1a;--r:22px;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  a{color:inherit}
+  .stage{max-width:1280px;margin:0 auto;padding:34px 40px 80px}
+  .tabs{display:flex;gap:6px;margin-bottom:30px}
+  .tab{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:11px;font-size:13.5px;font-weight:600;color:var(--muted);transition:all .15s;text-decoration:none}
+  .tab:hover{color:var(--text);background:var(--panel)}
+  .tab.on{background:var(--panel);color:#fff}
+  .tab .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .wordmark{font-size:13px;font-weight:800;letter-spacing:.22em;color:var(--dim)}
+  .head h1{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.02em}
+  .head-sub{color:var(--muted);font-size:15px;margin-bottom:30px;max-width:660px}
+
+  /* demo frame: one 2x2 bento cell */
+  .demo{display:grid;grid-template-columns:608px;justify-content:start}
+
+  /* ============ QUEST CARD COMPONENT (self-contained, .qt- scoped) ============ */
+  .qt{position:relative;width:100%;min-height:452px;border-radius:var(--r);overflow:hidden;background:
+      radial-gradient(120% 90% at 85% -10%,rgba(255,92,26,.16),transparent 55%),
+      radial-gradient(100% 80% at -10% 110%,rgba(79,124,255,.10),transparent 55%),
+      var(--panel);
+      border:1px solid var(--line);display:flex;flex-direction:column;isolation:isolate}
+  .qt-head{display:flex;align-items:center;gap:14px;padding:18px 20px 14px}
+  .qt-badge{position:relative;width:52px;height:52px;flex:none;border-radius:15px;display:flex;align-items:center;justify-content:center;
+      font-size:24px;background:linear-gradient(135deg,rgba(255,92,26,.25),rgba(255,92,26,.08));border:1px solid rgba(255,92,26,.4);
+      box-shadow:0 4px 18px rgba(255,92,26,.25);transition:transform .3s}
+  .qt.lvlup .qt-badge{animation:qtPop .7s cubic-bezier(.2,.8,.2,1)}
+  @keyframes qtPop{0%{transform:scale(1)}35%{transform:scale(1.35) rotate(-6deg)}70%{transform:scale(.94)}100%{transform:scale(1)}}
+  .qt-rank{flex:1;min-width:0}
+  .qt-rank .r1{display:flex;align-items:baseline;gap:8px}
+  .qt-rank b{font-size:17px;font-weight:800;letter-spacing:-.01em}
+  .qt-rank .lv{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#ffb08a}
+  .qt-rank .xps{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .qt-ring{position:relative;width:46px;height:46px;flex:none}
+  .qt-ring svg{transform:rotate(-90deg)}
+  .qt-ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#ffb08a}
+  .qt-bar{height:6px;margin:0 20px;border-radius:99px;background:var(--panel2);overflow:hidden}
+  .qt-bar i{display:block;height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#ff8a3d);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+  .qt-tiers{display:flex;gap:6px;padding:10px 20px 4px}
+  .qt-tier{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 4px;border-radius:10px;font-size:14px;opacity:.38;transition:all .2s;border:1px solid transparent}
+  .qt-tier span{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .qt-tier.done{opacity:.85}
+  .qt-tier.done span{color:#7ee2a1}
+  .qt-tier.now{opacity:1;background:rgba(255,92,26,.1);border-color:rgba(255,92,26,.35)}
+  .qt-tier.now span{color:#ffb08a}
+
+  .qt-task{flex:1;margin:10px 20px 0;background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:16px 17px;display:flex;flex-direction:column;overflow:hidden}
+  .qt-task .t-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .qt-feat{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#ffb08a;background:rgba(255,92,26,.12);border:1px solid rgba(255,92,26,.3);padding:4px 9px;border-radius:99px}
+  .qt-xp{margin-left:auto;font-size:11px;font-weight:800;color:#7ee2a1;background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.3);padding:4px 10px;border-radius:99px}
+  .qt-task h3{font-size:17.5px;font-weight:800;line-height:1.25;letter-spacing:-.01em;margin-bottom:6px}
+  .qt-task .why{font-size:12.5px;line-height:1.55;color:var(--muted);margin-bottom:10px}
+  .qt-steps{overflow-y:auto;flex:1;min-height:0}
+  .qt-step{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+  .qt-step .cb{width:18px;height:18px;flex:none;margin-top:1px;border-radius:6px;border:1.5px solid var(--dim);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;transition:all .15s}
+  .qt-step.on .cb{background:var(--accent);border-color:var(--accent);color:#fff}
+  .qt-step p{font-size:13px;line-height:1.5;color:#c9c9d1}
+  .qt-step.on p{color:var(--dim);text-decoration:line-through}
+  .qt-doc{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--muted);text-decoration:none;margin-top:8px}
+  .qt-doc:hover{color:#ffb08a}
+
+  .qt-foot{display:flex;gap:9px;padding:14px 20px 18px}
+  .qt-done-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;font-weight:800;font-size:14px;padding:13px;border-radius:12px;transition:all .15s}
+  .qt-done-btn:hover{background:#ff6e35;transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,92,26,.4)}
+  .qt-done-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+  .qt-swap{width:46px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:16px;transition:all .15s}
+  .qt-swap:hover{color:#fff;border-color:var(--muted)}
+
+  /* celebration burst */
+  .qt-burst{position:absolute;inset:0;pointer-events:none;z-index:5}
+  .qt-burst i{position:absolute;width:8px;height:8px;border-radius:2px;opacity:0}
+  .qt.burst .qt-burst i{animation:qtFly .9s cubic-bezier(.15,.8,.3,1) forwards}
+  @keyframes qtFly{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(240deg)}}
+
+  /* finished state */
+  .qt-fin{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px}
+  .qt-fin .big{font-size:52px}
+  .qt-fin h3{font-size:22px;font-weight:800}
+  .qt-fin p{font-size:13.5px;color:var(--muted);max-width:380px;line-height:1.6}
+  .qt-reset{margin-top:6px;font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);padding:9px 16px;border-radius:10px;transition:all .15s}
+  .qt-reset:hover{color:#fff;border-color:var(--muted)}
+
+  .compnote{margin-top:22px;font-size:12.5px;color:var(--dim);max-width:600px;line-height:1.7}
+  .compnote code{background:#16161a;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#ffb08a;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <nav class="tabs">
+    <a class="tab" href="emotiv-studio-home.html"><span>◐</span> Discover</a>
+    <a class="tab" href="emotiv-studio-experiments.html"><span>✦</span> Experiments</a>
+    <a class="tab on" href="emotiv-studio-quest.html"><span class="d"></span> Brain Quest</a>
+    <a class="tab" href="emotiv-studio-research.html"><span>◎</span> Research</a>
+  </nav>
+  <div class="head"><span class="wordmark">EMOTIV STUDIO</span><h1>Brain Quest</h1></div>
+  <div class="head-sub">One interactive bento card that levels a new owner from first green sensor to running a five-person study — every assignment is a real Studio feature. Progress persists between sessions.</div>
+
+  <div class="demo">
+    <div class="qt" id="qt">
+      <div class="qt-burst" id="qt-burst"></div>
+      <div class="qt-head">
+        <div class="qt-badge" id="qt-badge">✨</div>
+        <div class="qt-rank">
+          <div class="r1"><b id="qt-rankname">Spark</b><span class="lv" id="qt-lvl">Level 1 · 5</span></div>
+          <div class="xps" id="qt-xps">0 XP · next rank at 50 XP</div>
+        </div>
+        <div class="qt-ring">
+          <svg width="46" height="46" viewBox="0 0 46 46">
+            <circle cx="23" cy="23" r="19" fill="none" stroke="#222226" stroke-width="5"/>
+            <circle id="qt-ringfg" cx="23" cy="23" r="19" fill="none" stroke="#ff5c1a" stroke-width="5" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"/>
+          </svg>
+          <div class="pct" id="qt-pct">0%</div>
+        </div>
+      </div>
+      <div class="qt-bar"><i id="qt-barfill"></i></div>
+      <div class="qt-tiers" id="qt-tiers"></div>
+      <div id="qt-main"></div>
+      <div class="qt-foot" id="qt-foot">
+        <button class="qt-done-btn" id="qt-complete">Mark complete <span id="qt-cxp"></span></button>
+        <button class="qt-swap" id="qt-swap" title="Swap for another assignment">⇄</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="compnote">Component note: everything inside <code>.qt</code> is self-contained (scoped styles, own state in <code>localStorage["emotiv-quest-v1"]</code>). Drop it into the Discover bento as an <code>s22</code> tile and it keeps working — swap the storage call for your account profile service when it goes real.</div>
+</div>
+
+<script>
+/* ============ DATA: 5 ranks, 16 real Studio assignments ============ */
+const RANKS=[
+ {name:'Spark',icon:'✨',at:0},
+ {name:'Neuron',icon:'⚡',at:50},
+ {name:'Synapse',icon:'🔗',at:130},
+ {name:'Circuit',icon:'🧩',at:255},
+ {name:'Cortex',icon:'🧠',at:475}
+];
+const DONE_AT=735;
+
+const TASKS=[
+ /* SPARK — first contact */
+ {id:'pair',tier:0,xp:15,feat:'Signal quality',title:'First contact',why:'Studio\'s signal-quality check is the foundation of everything — no green, no data.',
+  steps:['Charge and pair your headset in the EMOTIV Launcher','Adjust each sensor until the contact-quality map is fully green','Hold 100% overall quality for 60 seconds'],
+  doc:['Quick-start guide','https://www.emotiv.com/setup']},
+ {id:'live',tier:0,xp:15,feat:'Live data',title:'Meet your brain',why:'Learn what real EEG looks like — including what artifacts look like, so you can spot them forever.',
+  steps:['Open the live data view and watch your raw EEG for 2 minutes','Blink hard 3 times — find the blink artifacts','Clench your jaw — see the muscle noise, then relax and watch it vanish'],
+  doc:['EEG guide','https://www.emotiv.com/blogs/news/emotiv-eeg-guide']},
+ {id:'record',tier:0,xp:20,feat:'Recording',title:'Your first recording',why:'Recording + markers is the core loop of Studio. Everything else builds on it.',
+  steps:['Start a 2-minute recording','Drop a marker at 3 moments you choose (stand up, sip coffee, close eyes)','Stop, replay the session, and find your 3 markers on the timeline'],
+  doc:['Recording basics','https://emotiv.gitbook.io/emotivpro-v3/']},
+
+ /* NEURON — reading signals */
+ {id:'alpha',tier:1,xp:25,feat:'Band power',title:'The alpha handshake',why:'Your first real neuroscience result — visible in one sitting, no maths required.',
+  steps:['Open the band-power view and start recording','Alternate 30 s eyes OPEN / 30 s eyes CLOSED, three times, marking each switch','Confirm alpha (8–12 Hz) rises in every eyes-closed block'],
+  doc:['ERP & bands tutorial','https://www.emotiv.com/blog/basics-of-event-related-potentials']},
+ {id:'metrics',tier:1,xp:25,feat:'Performance metrics',title:'Meet your six metrics',why:'Attention, Engagement, Excitement, Interest, Relaxation, Stress — Studio\'s vocabulary for how you feel.',
+  steps:['Open Performance Metrics and watch all six for 5 minutes','Do something boring for a minute, then something you love — watch Engagement move','Note which metric responds most strongly for you'],
+  doc:['Performance metrics','https://www.emotiv.com/studio']},
+ {id:'focusproof',tier:1,xp:30,feat:'Attention metric',title:'Prove the Attention metric',why:'Trust the numbers because you tested them on yourself, not because we said so.',
+  steps:['Record 1 minute of rest (marker), then 1 minute of hard mental arithmetic (marker)','Repeat the pair once more','Compare Attention across the four blocks — it should separate rest from effort'],
+  doc:['Studio metrics','https://www.emotiv.com/studio']},
+
+ /* SYNAPSE — building */
+ {id:'firstexp',tier:2,xp:40,feat:'Experiment Builder',title:'Build your first experiment',why:'The Builder turns you from a viewer into a researcher: instructions, stimuli, auto time-locking.',
+  steps:['Create a new experiment with an instruction phase and two image stimuli','Run it on yourself — Studio timestamps every stimulus automatically','Open the session and check each image onset is marked'],
+  doc:['Experiment Builder','https://emotiv.gitbook.io/emotivpro-builder/']},
+ {id:'mediatest',tier:2,xp:40,feat:'Real-time collection',title:'Run a media test',why:'This is the exact workflow brands use to test ads — on your own favourite content.',
+  steps:['Load 3 contrasting video or audio clips (30–60 s each) into an experiment','Watch them in randomized order while recording','Compare the Engagement and Interest curves clip by clip'],
+  doc:['Studio overview','https://www.emotiv.com/studio']},
+ {id:'participant2',tier:2,xp:45,feat:'Participant management',title:'Recruit participant #2',why:'Science starts at n=2. Studio\'s participant tools keep sessions organised from the first friend onward.',
+  steps:['Add a friend as a participant in Studio','Run your media test on them with a fresh signal-quality check','Compare their metric curves with yours'],
+  doc:['Studio overview','https://www.emotiv.com/studio']},
+
+ /* CIRCUIT — research grade */
+ {id:'oddball',tier:3,xp:60,feat:'Time-locking',title:'Run the oddball',why:'A classic ERP paradigm, powered by Studio\'s precise stimulus timestamps.',
+  steps:['Build an audio experiment: one standard tone (80%), one deviant (20%), ~150 trials','Record a full run on yourself','Average deviant vs standard epochs and look for the mismatch response'],
+  doc:['ERP tutorial','https://www.emotiv.com/blog/basics-of-event-related-potentials']},
+ {id:'iq',tier:3,xp:50,feat:'EmotivIQ™',title:'Let EmotivIQ read the room',why:'AI summaries turn hours of analysis into minutes — but an expert always verifies.',
+  steps:['Run EmotivIQ analysis on one of your recorded sessions','Read the AI summary and pick its strongest claim','Verify that claim yourself against the raw metric curves'],
+  doc:['EmotivIQ','https://www.emotiv.com/studio']},
+ {id:'field',tier:3,xp:50,feat:'Offline mode',title:'Go into the field',why:'Studio records without internet and syncs later — real research doesn\'t stay at a desk.',
+  steps:['Take your headset somewhere with no Wi-Fi (park, café basement, train)','Record a full session offline','Return online and confirm the session synced to the cloud'],
+  doc:['Studio overview','https://www.emotiv.com/studio']},
+ {id:'ab',tier:3,xp:60,feat:'A/B testing',title:'A/B test two designs',why:'The core Studio use case: two versions, one brain, a defensible answer.',
+  steps:['Pick two versions of anything — two posters, two cuts of a video, two app screens','Build an experiment showing both in randomized order','Use metrics + EmotivIQ to call a winner, and note your evidence'],
+  doc:['Studio overview','https://www.emotiv.com/studio']},
+
+ /* CORTEX — expert */
+ {id:'panel',tier:4,xp:80,feat:'Participant management',title:'Run a panel of five',why:'Group data is where neuroscience gets predictive — small panels forecast large audiences.',
+  steps:['Recruit 5 participants and schedule them in Studio','Run the same experiment on all five with clean signal checks','Compare group-level metric patterns against individual quirks'],
+  doc:['Studio overview','https://www.emotiv.com/studio']},
+ {id:'predict',tier:4,xp:80,feat:'Predictive research',title:'Predict, then verify',why:'The expert habit: commit to a hypothesis before the data can talk you out of it.',
+  steps:['Before testing, write down which asset your panel\'s brains will prefer — and why','Run the study on your panel','Score your prediction against the results, honestly'],
+  doc:['Studio overview','https://www.emotiv.com/studio']},
+ {id:'ship',tier:4,xp:100,feat:'Insights',title:'Ship an insight report',why:'The final skill: turning brain data into a one-page decision someone else can act on.',
+  steps:['Take your best study and pull its key metric charts','Add the EmotivIQ summary and your own verification notes','Write a one-page recommendation and send it to a real human'],
+  doc:['Studio overview','https://www.emotiv.com/studio']}
+];
+
+/* ============ STATE ============ */
+const KEY='emotiv-quest-v1';
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){S={}}
+S.done=S.done||[];S.steps=S.steps||{};S.skip=S.skip||[];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+const xp=()=>TASKS.filter(t=>S.done.includes(t.id)).reduce((a,t)=>a+t.xp,0);
+const rankIdx=x=>{let i=0;RANKS.forEach((r,j)=>{if(x>=r.at)i=j});return i};
+const curTier=()=>{for(let t=0;t<5;t++){if(TASKS.some(k=>k.tier===t&&!S.done.includes(k.id)))return t}return 5};
+function nextTask(){
+  const t=curTier();if(t===5)return null;
+  const open=TASKS.filter(k=>k.tier===t&&!S.done.includes(k.id));
+  const notSkipped=open.filter(k=>!S.skip.includes(k.id));
+  return (notSkipped[0]||open[0]);
+}
+
+/* ============ RENDER ============ */
+const el=id=>document.getElementById(id);
+function render(prevRank){
+  const x=xp(),ri=rankIdx(x),r=RANKS[ri];
+  const nxt=RANKS[ri+1];
+  el('qt-badge').textContent=x>=DONE_AT?'👑':r.icon;
+  el('qt-rankname').textContent=x>=DONE_AT?'Cortex Legend':r.name;
+  el('qt-lvl').textContent='Level '+(ri+1)+' · 5';
+  el('qt-xps').textContent=x+' XP'+(nxt?' · next rank at '+nxt.at+' XP':' · all ranks earned');
+  const pct=Math.min(100,Math.round(x/DONE_AT*100));
+  el('qt-pct').textContent=pct+'%';
+  el('qt-ringfg').style.strokeDashoffset=(119.4*(1-pct/100)).toFixed(1);
+  const span=nxt? (x-r.at)/(nxt.at-r.at) : 1;
+  el('qt-barfill').style.width=Math.min(100,Math.round(span*100))+'%';
+  /* tier dots */
+  el('qt-tiers').innerHTML=RANKS.map((rr,i)=>{
+    const tierDone=TASKS.filter(t=>t.tier===i).every(t=>S.done.includes(t.id));
+    const now=curTier()===i;
+    return '<div class="qt-tier'+(tierDone?' done':'')+(now?' now':'')+'"><div>'+(tierDone?'✓':rr.icon)+'</div><span>'+rr.name+'</span></div>';
+  }).join('');
+  /* main */
+  const t=nextTask();
+  const main=el('qt-main'),foot=el('qt-foot');
+  if(!t){
+    main.innerHTML='<div class="qt-fin"><div class="big">👑</div><h3>Cortex Legend</h3><p>All 16 assignments complete — from first green sensor to a shipped insight report. You\'ve used every core Studio feature. Go build something nobody\'s seen.</p><button class="qt-reset" id="qt-reset">Start the journey again</button></div>';
+    foot.style.display='none';
+    el('qt-reset').addEventListener('click',()=>{S={done:[],steps:{},skip:[]};save();render();});
+    return;
+  }
+  foot.style.display='flex';
+  const stepsDone=S.steps[t.id]||[];
+  main.innerHTML='<div class="qt-task"><div class="t-top"><span class="qt-feat">'+t.feat+'</span><span class="qt-xp">+'+t.xp+' XP</span></div>'+
+    '<h3>'+t.title+'</h3><div class="why">'+t.why+'</div><div class="qt-steps">'+
+    t.steps.map((s,i)=>'<div class="qt-step'+(stepsDone.includes(i)?' on':'')+'" data-i="'+i+'"><span class="cb">✓</span><p>'+s+'</p></div>').join('')+
+    '<a class="qt-doc" href="'+t.doc[1]+'" target="_blank" rel="noopener">📘 '+t.doc[0]+' ↗</a></div></div>';
+  el('qt-cxp').textContent='+'+t.xp+' XP';
+  main.querySelectorAll('.qt-step').forEach(st=>st.addEventListener('click',()=>{
+    const i=+st.dataset.i;const arr=S.steps[t.id]=S.steps[t.id]||[];
+    const k=arr.indexOf(i);if(k>=0)arr.splice(k,1);else arr.push(i);
+    save();st.classList.toggle('on');
+  }));
+  el('qt-complete').onclick=()=>{
+    const before=rankIdx(xp());
+    S.done.push(t.id);delete S.steps[t.id];save();
+    burst();
+    render(before);
+    const after=rankIdx(xp());
+    if(after>before||xp()>=DONE_AT){el('qt').classList.add('lvlup');setTimeout(()=>el('qt').classList.remove('lvlup'),800);}
+  };
+  el('qt-swap').onclick=()=>{
+    if(!S.skip.includes(t.id))S.skip.push(t.id);
+    const open=TASKS.filter(k=>k.tier===t.tier&&!S.done.includes(k.id));
+    /* if everything in this tier has been skipped, clear the skips so rotation restarts */
+    if(open.every(k=>S.skip.includes(k.id)))S.skip=S.skip.filter(id=>!open.some(k=>k.id===id));
+    save();render();
+  };
+}
+
+/* confetti burst */
+function burst(){
+  const b=el('qt-burst');b.innerHTML='';
+  const colors=['#ff5c1a','#ff8a3d','#7ee2a1','#4f7cff','#ffd0a8'];
+  for(let i=0;i<26;i++){
+    const s=document.createElement('i');
+    s.style.left='50%';s.style.top='40%';
+    s.style.background=colors[i%colors.length];
+    s.style.setProperty('--dx',(Math.random()*320-160)+'px');
+    s.style.setProperty('--dy',(Math.random()*260-130)+'px');
+    s.style.animationDelay=(Math.random()*.08)+'s';
+    b.appendChild(s);
+  }
+  const q=el('qt');q.classList.remove('burst');void q.offsetWidth;q.classList.add('burst');
+}
+render();
+</script>
+</body>
+</html>

@@ -51,12 +51,23 @@ Style note: it's "Emotiv", never "EMOTIV".
 - `hero/baseline` — static emotiv.com header+hero clone, untouched (source:
   ~/Documents/Playground/static header/). Stored for future use.
 - `hero/cta` — same, with injected nav CTA experiment: "Shop" (white outline)
-  + "Start Now" (blue), re-applied via MutationObserver over menu swaps.
+  + "Start Now" (blue). "Start Now" opens `hero/cta/onboarding/` — the
+  general Emotiv onboarding qualifier (slide-based; routes to EmotivPro /
+  Emotiv Studio / EmotivBCI). Emotiv Studio is the future flagship but other
+  products are still sold separately — onboarding stays product-neutral.
+- `bento` — Emotiv Studio onboarding demo site (Discover / Experiments /
+  Brain Quest / Research), source: ~/Documents/Playground/emotiv-studio-site.
 
 The mock Chrome's new-tab page (`public/ntp.html`) mimics Google search +
-recent pages and links to both hero builds via postMessage to the shell.
+recent pages and links to hero builds + bento via postMessage to the shell.
 
 ## Pending
 
-- Customer-stories project (4 HTMLs) — files not yet received.
+- Headset recommender step inside onboarding (assets from shop.emotiv.com and
+  brainwear.app — Uldis authorized use; MN8 is part of the Brainwear experience).
 - Replace the Apple logo in the menu bar with Uldis's logo (asset pending).
+- Pexels API key: provided by Uldis (chat, 2026-07-23) for future asset
+  curation. NOT stored here — repo is public. Add as worker secret
+  PEXELS_API_KEY when needed.
+- NOTE: this repo is PUBLIC on GitHub — consider making it private
+  (Settings → General → Danger Zone) since mockups are proprietary.

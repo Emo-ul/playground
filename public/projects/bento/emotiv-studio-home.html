@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotiv Studio — Discover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0b;--panel:#141416;--line:#26262a;--text:#f4f4f5;--muted:#9b9ba3;--dim:#66666e;--accent:#ff5c1a;--r:22px;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  a{color:inherit}
+  .stage{max-width:1280px;margin:0 auto;padding:34px 40px 80px}
+  .tabs{display:flex;gap:6px;margin-bottom:30px}
+  .tab{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:11px;font-size:13.5px;font-weight:600;color:var(--muted);transition:all .15s;text-decoration:none}
+  .tab:hover{color:var(--text);background:var(--panel)}
+  .tab.on{background:var(--panel);color:#fff}
+  .tab .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .wordmark{font-size:13px;font-weight:800;letter-spacing:.22em;color:var(--dim)}
+  .head h1{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.02em}
+  .head-sub{color:var(--muted);font-size:15px;margin-bottom:30px}
+
+  .bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:212px;gap:16px;grid-auto-flow:dense}
+  @media(max-width:1080px){.bento{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.bento{grid-template-columns:1fr}}
+  .tile{position:relative;border-radius:var(--r);overflow:hidden;text-align:left;background:var(--panel);isolation:isolate;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s}
+  .tile:hover{transform:scale(1.018);box-shadow:0 18px 50px rgba(0,0,0,.55);z-index:2}
+  .tile:active{transform:scale(.995)}
+  .tile.s22{grid-column:span 2;grid-row:span 2}
+  .tile.s21{grid-column:span 2}
+  .tile.s12{grid-row:span 2}
+  @media(max-width:560px){.tile.s22,.tile.s21{grid-column:span 1}}
+  .tile .bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .tile:hover .bgimg{transform:scale(1.05)}
+  .tile .scrim{position:absolute;inset:0;z-index:0;background:linear-gradient(183deg,rgba(6,6,8,.15) 24%,rgba(6,6,8,.86) 88%)}
+  .tile .inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:18px 20px}
+  .toprow{display:flex;align-items:center;gap:8px}
+  .pill{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border-radius:99px;background:rgba(10,10,12,.55);backdrop-filter:blur(8px);color:#fff}
+  .pill.hot{background:var(--accent)}
+  .pill.new{background:#2563eb}
+  .vtag{margin-left:auto;font-size:10.5px;font-weight:700;color:#fff;background:rgba(10,10,12,.5);padding:5px 10px;border-radius:99px;backdrop-filter:blur(8px);display:flex;align-items:center;gap:5px}
+  .vtag::before{content:"▶";color:var(--accent);font-size:8px}
+  .tile h3{font-size:19px;font-weight:800;line-height:1.22;letter-spacing:-.01em;text-shadow:0 2px 16px rgba(0,0,0,.6)}
+  .tile.s22 h3{font-size:29px}.tile.s21 h3{font-size:22px}
+  .tile .sub{font-size:12.5px;color:rgba(255,255,255,.82);margin-top:6px;font-weight:500}
+  .bignum{font-size:60px;font-weight:900;letter-spacing:-.04em;line-height:1;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+
+  /* drawer */
+  .backdrop{position:fixed;inset:0;background:rgba(5,5,7,.62);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .28s;z-index:40}
+  .backdrop.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(510px,100%);background:#101013;border-left:1px solid var(--line);transform:translateX(102%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:50;display:flex;flex-direction:column}
+  .drawer.on{transform:translateX(0)}
+  .d-top{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line);min-height:56px}
+  .d-top .k{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  .d-back{display:none;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel);transition:all .15s}
+  .d-back:hover{color:#fff;border-color:var(--muted)}
+  .d-back.show{display:inline-flex}
+  .d-close{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:15px;transition:all .15s;flex:none}
+  .d-close:hover{color:#fff;border-color:var(--muted)}
+  .d-scroll{overflow-y:auto;flex:1;padding:24px 26px 30px}
+  .d-media{border-radius:14px;overflow:hidden;margin:0 0 18px;background:#000}
+  .d-media img{width:100%;display:block}
+  .d-media .vwrap{position:relative;aspect-ratio:16/9;cursor:pointer}
+  .d-media .vwrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .d-media .vwrap .pb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.28)}
+  .d-media .vwrap .pb span{width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;padding-left:3px;box-shadow:0 6px 24px rgba(255,92,26,.5)}
+  .d-media iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+  .d-hero{height:120px;border-radius:14px;margin-bottom:18px;background-size:cover;background-position:center;position:relative}
+  .d-hero::after{content:"";position:absolute;inset:0;border-radius:14px;background:linear-gradient(160deg,transparent,rgba(6,6,8,.5))}
+  .d-scroll h2{font-size:24px;font-weight:800;line-height:1.22;letter-spacing:-.015em;margin-bottom:14px}
+  .d-scroll p{font-size:14.5px;line-height:1.7;color:#c9c9d1;margin-bottom:14px}
+  .sect{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:24px 0 12px}
+  .d-scroll ul.plain{list-style:none;margin-bottom:6px}
+  .d-scroll ul.plain li{position:relative;padding:7px 0 7px 24px;font-size:14px;line-height:1.55;color:#c9c9d1}
+  .d-scroll ul.plain li::before{content:"";position:absolute;left:3px;top:14px;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+  .d-scroll ol.steps{list-style:none;counter-reset:s;margin-bottom:6px}
+  .d-scroll ol.steps li{position:relative;padding:9px 0 9px 36px;font-size:14px;line-height:1.6;color:#c9c9d1;counter-increment:s}
+  .d-scroll ol.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:23px;height:23px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .d-scroll ol.steps li code{background:#1c1c22;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;color:#ffb08a}
+  /* flowchart */
+  .flow{margin:6px 0 4px}
+  .fnode{position:relative;display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .fconn{height:36px;width:34px;margin-left:14px;display:flex;align-items:center;justify-content:center}
+  .fconn svg{display:block;filter:drop-shadow(0 0 7px rgba(255,92,26,.55))}
+  .fnode .fi{width:34px;height:34px;flex:none;border-radius:9px;background:rgba(255,92,26,.14);color:#ffb08a;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+  .fnode .ft b{font-size:13.5px;font-weight:700;display:block;line-height:1.3}
+  .fnode .ft span{font-size:12px;color:var(--muted);line-height:1.45;display:block;margin-top:2px}
+  .fnode.branch{border-style:dashed;border-color:rgba(255,92,26,.4)}
+  .docs a{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;text-decoration:none;margin-bottom:8px;transition:all .15s;background:rgba(255,255,255,.015)}
+  .docs a:hover{border-color:var(--accent);background:rgba(255,92,26,.08)}
+  .docs a .di{font-size:15px}
+  .docs a .dt{flex:1;font-size:13.5px;font-weight:600;color:#e7e7ee}
+  .docs a .dg{font-size:11px;color:var(--dim)}
+  .docs a .dx{color:var(--dim);font-size:13px}
+  .note{display:flex;gap:10px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);border-radius:11px;padding:12px 14px;margin-top:14px;font-size:13px;line-height:1.55;color:#bcd0ff}
+  .d-foot{padding:15px 26px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:9px}
+  .cta{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;padding:14px 20px;border-radius:12px;text-decoration:none;transition:all .15s;border:none;width:100%}
+  .cta:hover{background:#ff6e35;transform:translateY(-1px);box-shadow:0 8px 26px rgba(255,92,26,.4)}
+  .cta.ghost{background:var(--panel);border:1px solid var(--line);color:var(--text)}
+  .cta.ghost:hover{background:#1b1b20;box-shadow:none;border-color:var(--muted)}
+  .srclink{text-align:center;font-size:12px;color:var(--dim);text-decoration:none}
+  .srclink:hover{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <nav class="tabs">
+    <a class="tab on" href="emotiv-studio-home.html"><span class="d"></span> Discover</a>
+    <a class="tab" href="emotiv-studio-experiments.html"><span>✦</span> Experiments</a>
+    <a class="tab" href="emotiv-studio-quest.html"><span>◇</span> Brain Quest</a>
+    <a class="tab" href="emotiv-studio-research.html"><span>◎</span> Research</a>
+  </nav>
+  <div class="head"><span class="wordmark">EMOTIV STUDIO</span><h1>What will you create?</h1></div>
+  <div class="head-sub">Real stories from the community — and a step-by-step build guide behind every one. Pick a card, then hit Create.</div>
+  <div class="bento" id="bento"></div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true">
+  <div class="d-top">
+    <button class="d-back" id="d-back">‹ Back</button>
+    <span class="k" id="d-kicker"></span>
+    <button class="d-close" id="d-close" aria-label="Close">✕</button>
+  </div>
+  <div class="d-scroll" id="d-body"></div>
+  <div class="d-foot" id="d-foot"></div>
+</aside>
+
+<script>
+const PX=(id,w=940,h=560)=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&dpr=1`;
+
+/* ---------- GUIDES (opened by the Create button) ---------- */
+const G={
+ 'mental-command':{
+   title:'Train your first Mental Command',
+   intro:'The atom of every Emotiv build: teach the system one repeatable thought, then wire it to anything — a drone, a game, a light.',
+   flow:[
+     ['🎧','Fit headset','All sensors green in Contact Quality'],
+     ['✦','EmotivBCI → Mental Commands','Open the training panel'],
+     ['◯','Train NEUTRAL','8 s relaxed, thinking of nothing'],
+     ['➤','Train an action','e.g. "Push" — 8 s, same vivid thought'],
+     ['🧊','Test on the 3D cube','Retrain weak actions, repeat 4–8×'],
+     ['🔌','Use it anywhere','Subscribe to the com stream via Cortex']
+   ],
+   need:['Any Emotiv headset (Insight, EPOC X, FLEX)','EMOTIV Launcher + EmotivBCI (or Studio)'],
+   steps:['Fit the headset and confirm every sensor is green','Open EmotivBCI and select Mental Commands','Record <b>Neutral</b> first — 8 seconds, relaxed','Add an action like <b>Push</b> and train it 8 seconds, imagining the exact same thing each time','Repeat 4–8 rounds; watch the skill-rating bars climb','Test on the floating 3D cube; retrain any weak command','To control other apps, subscribe to the <code>com</code> stream through the Cortex API'],
+   tips:['Use the <i>same</i> thought every repetition — a vivid mental image works best','Anchor it to something physical (imagine pushing a real box)','One strong command beats four shaky ones','Short sessions; stop while accuracy is still rising'],
+   docs:[['📘','EmotivBCI manual','Mental command training','https://emotiv.gitbook.io/emotivbci/'],['🧠','Mental Commands — knowledge base','How the algorithm works','https://www.emotiv.com/knowledge-base/mental-commands'],['⌘','Cortex API — Advanced BCI','com stream + training API','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['▶','Emotiv Academy','Video walkthroughs','https://www.youtube.com/@EmotivAcademy']],
+   video:'hK5fTYd9gZM'
+ },
+ 'cortex':{
+   title:'Build anything with the Cortex API',
+   intro:'Cortex is the WebSocket brain behind every integration on this screen. Learn the handshake once and you can pipe brain data into any app or device.',
+   flow:[
+     ['1','Register your app','account.emotiv.com → client id + secret'],
+     ['2','Connect','WebSocket to wss://localhost:6868'],
+     ['3','requestAccess','Approve the app once in the Launcher'],
+     ['4','authorize','Returns a Cortex token'],
+     ['5','createSession','Bind to your headset → session id'],
+     ['6','subscribe','eeg · pow · met · com · fac'],
+     ['7','Act on the JSON','Map streams to your outputs']
+   ],
+   need:['An EMOTIV account','A registered Cortex app (client id + secret)','EMOTIV Launcher running with a headset','Node.js or Python'],
+   steps:['Register a Cortex app at <b>account.emotiv.com → Cortex Apps</b>; copy the client id + secret','Install a WebSocket client (<code>ws</code> for Node, <code>websocket-client</code> for Python). Cortex listens at <code>wss://localhost:6868</code>','Call <code>requestAccess</code> and approve your app once in the Launcher','Call <code>authorize</code> to get a Cortex token','Call <code>createSession</code> with your headset to get a session id','<code>subscribe</code> to the streams you need: <code>pow</code> (band power), <code>met</code> (metrics), <code>com</code> (mental commands), <code>fac</code> (expressions), <code>eeg</code> (raw)','Cortex pushes JSON arrays — map them to whatever you are controlling'],
+   tips:['Clone an official <b>cortex-example</b> repo as scaffolding','Metrics and commands are licence-free; raw EEG needs a licence','Keep the Launcher open — Cortex runs locally beside the headset'],
+   docs:[['⌘','Cortex API documentation','Full reference','https://emotiv.gitbook.io/cortex-api/'],['🔑','Authentication','requestAccess → authorize','https://emotiv.gitbook.io/cortex-api/authentication'],['📡','Data subscription','pow · met · com · fac · eeg','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🐙','Emotiv on GitHub','cortex-example (Node/Python/Unity)','https://github.com/Emotiv/cortex-example'],['🛠','Developer portal','Register + docs hub','https://www.emotiv.com/developer']]
+ },
+ 'game-controller':{
+   title:'Turn your thoughts into game controls',
+   intro:'Perrikaryal beat Elden Ring this way. Map trained Mental Commands and facial expressions to the keystrokes your game already understands.',
+   flow:[
+     ['✦','Train commands','EmotivBCI: Push, Pull, + a facial expression'],
+     ['📡','Stream','Cortex com + fac streams'],
+     ['⌨','Map → keys','Script: command over threshold → key press'],
+     ['🎮','Game responds','Attack, dodge, heal']
+   ],
+   need:['EPOC X or Insight','EmotivBCI','Python + a key-emulation lib (pynput / keyboard)','A game that reads the keyboard'],
+   steps:['Train 2–4 Mental Commands (e.g. Push = attack, Pull = dodge) plus a facial expression (clench = heal)','Subscribe to <code>com</code> and <code>fac</code> via Cortex','In your script, when a command\'s power passes a threshold, send the mapped key with <code>pynput</code>','Add debouncing so one thought triggers exactly one press','Start on a slow or turn-based game; raise complexity as your accuracy grows'],
+   tips:['Facial expressions (smile, clench) are fast and reliable for time-critical moves','Combine with head-tilt or a gamepad for hybrid control','Keep sessions short so your signal stays consistent'],
+   docs:[['⌘','Cortex — Advanced BCI','com + fac in code','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['📘','EmotivBCI manual','Training profiles','https://emotiv.gitbook.io/emotivbci/'],['🐙','cortex-example','Working code samples','https://github.com/Emotiv/cortex-example'],['▶','Emotiv Academy','BCI build videos','https://www.youtube.com/@EmotivAcademy']]
+ },
+ 'visualise':{
+   title:'Turn your brainwaves into live visuals',
+   intro:'Brainstorms and Mood Roads did this at scale. Stream band power and drive colours, shapes and shaders in real time.',
+   flow:[
+     ['🎧','Headset','Any Emotiv device'],
+     ['📡','pow stream','Theta · alpha · beta · gamma per sensor'],
+     ['🎚','Map bands → params','alpha→calm blues, beta→hot reds'],
+     ['🖼','Render','BrainViz (no-code) or p5.js / TouchDesigner / Unity']
+   ],
+   need:['Any headset','Cortex app (or BrainViz for the no-code route)','A visual runtime — p5.js in the browser is easiest'],
+   steps:['No-code path: open <b>EMOTIV BrainViz</b> and see your brain rendered instantly','Custom path: subscribe to the <code>pow</code> stream','Normalise each band 0–1, then map it to a visual parameter (colour, size, motion)','Feed the values into a p5.js draw loop, or send OSC into TouchDesigner','Record the session and sync it to music for a Brainstorms-style piece'],
+   tips:['Smooth the signal with a moving average so visuals glide instead of flicker','Start by driving one parameter well before adding more'],
+   docs:[['🖼','EMOTIV BrainViz','No-code brain visuals','https://www.emotiv.com/emotiv-brainviz'],['📡','Cortex — Data subscription','pow band power','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🔗','Lab Streaming Layer','Sync to other tools','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl'],['▶','Emotiv Academy','Creative build videos','https://www.youtube.com/@EmotivAcademy']]
+ },
+ 'music':{
+   title:'Make music with your mind',
+   intro:'AngieC played TONTO; MindTunes wrote a whole track this way. Convert brain metrics into MIDI and drive any synth or DAW.',
+   flow:[
+     ['🎧','Headset','Any Emotiv device'],
+     ['📡','met / pow','Engagement, relaxation, band power'],
+     ['🎹','Map → MIDI','Metric → MIDI CC or note (mido)'],
+     ['🔊','DAW / synth','Virtual MIDI port → your instrument']
+   ],
+   need:['Any headset','Cortex app','A virtual MIDI port (loopMIDI on Windows, IAC on macOS)','Python <code>mido</code> + a DAW or synth'],
+   steps:['Create a virtual MIDI port (loopMIDI / IAC Driver)','Subscribe to <code>met</code> (engagement, relaxation) or <code>pow</code> (bands)','Map a value to a MIDI CC with <code>mido</code> — e.g. relaxation → filter cutoff','Route that MIDI port into your DAW and assign the CC to a synth parameter','Perform: shift your mental state and hear the sound move'],
+   tips:['Smooth the stream so the music isn\'t jittery','Begin with a single expressive parameter, then layer more'],
+   docs:[['📡','Cortex — Data subscription','met + pow streams','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🎹','mido (Python MIDI)','Send MIDI from code','https://mido.readthedocs.io/'],['🔗','Lab Streaming Layer','Tight audio sync','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl'],['▶','Emotiv Academy','Music BCI videos','https://www.youtube.com/@EmotivAcademy']]
+ },
+ 'attention':{
+   title:'Measure focus & attention in real time',
+   intro:'The attention-powered car slowed when its driver drifted. Read the same Attention metric and react to it however you like.',
+   flow:[
+     ['🎧','Headset','Any Emotiv device'],
+     ['📡','met stream','Attention · engagement · stress · relaxation'],
+     ['📈','Threshold','Below X = distracted'],
+     ['🔔','React','Alert, log, or slow a device']
+   ],
+   need:['Any headset','Cortex app (the met stream is licence-free)'],
+   steps:['Subscribe to <code>met</code> and read the attention value','Log it across a work session and chart your focus curve','Set a personal threshold; when attention drops below it, fire an alert (sound, notification, or slow a device)','Compare focus vs rest blocks to calibrate the threshold to you'],
+   tips:['Everyone\'s baseline differs — calibrate before trusting a number','Pair with the Focus vs Rest experiment to validate it'],
+   docs:[['📡','Cortex — Data subscription','met (Performance Metrics)','https://emotiv.gitbook.io/cortex-api/data-subscription'],['📊','EmotivPRO','Metrics + recording','https://www.emotiv.com/emotivpro'],['🛠','Developer portal','APIs + SDKs','https://www.emotiv.com/developer']]
+ },
+ 'record-research':{
+   title:'Record & export research-grade data',
+   intro:'The 22,000+ papers all start here: clean, time-marked EEG you can take to any analysis stack.',
+   flow:[
+     ['🎧','Headset','EPOC X / FLEX recommended'],
+     ['⦿','Record + mark','EmotivPRO: markers at each stimulus'],
+     ['⤓','Export','EDF or CSV'],
+     ['🧪','Analyse','EEGLAB · MATLAB · MNE-Python']
+   ],
+   need:['EPOC X or FLEX for broad coverage','EmotivPRO subscription (raw EEG export)','Optional: PsychoPy for precise stimulus timing'],
+   steps:['Record in EmotivPRO and drop an event marker at every stimulus','For millisecond timing, send markers from PsychoPy over LSL','Export the session as EDF or CSV','Load it into EEGLAB / MATLAB or MNE-Python for ERP and spectral analysis','Re-reference and epoch around your markers to build ERPs'],
+   tips:['Mastoid referencing is standard for ERP work','Aim for 100+ trials per condition for clean averages'],
+   docs:[['📊','EmotivPRO manual','Record + export','https://emotiv.gitbook.io/emotivpro-v3/'],['🔗','Lab Streaming Layer','PsychoPy + LSL','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl'],['📈','ERP tutorial','Marking a brain response','https://www.emotiv.com/blog/basics-of-event-related-potentials']]
+ },
+ 'setup':{
+   title:'Set up your headset in 5 minutes',
+   intro:'Everything on this screen begins the same way — a headset on your head and green dots on your screen.',
+   flow:[
+     ['🔋','Charge','USB; a full charge = several sessions'],
+     ['💧','Prep sensors','Moisten Insight tips / saline-soak EPOC pads'],
+     ['🔗','Pair','Bluetooth in the EMOTIV Launcher'],
+     ['🟢','Green contacts','Adjust until every sensor is green'],
+     ['〰','Live Brainwaves','Watch your mind stream in']
+   ],
+   need:['Your Emotiv headset + charging cable','EMOTIV Launcher installed'],
+   steps:['Charge over USB — a full charge runs multiple sessions','Prep the sensors: moisten Insight\'s polymer tips, or saline-soak EPOC X felt pads','Open the Launcher and pair over Bluetooth — your headset appears by name','Seat the headset until every sensor shows green contact quality','Open Live Brainwaves and watch your EEG stream in real time'],
+   tips:['Part your hair under each sensor for better contact','A little more saline fixes most weak sensors'],
+   docs:[['🚀','Quick-start guide','Full setup walkthrough','https://www.emotiv.com/setup'],['🧩','EMOTIV Launcher','Pairing + updates','https://www.emotiv.com/emotiv-launcher']]
+ },
+ 'which-headset':{
+   title:'Which headset is right for you?',
+   intro:'Four headsets, one Studio. They differ in channels (how much of the brain you see) and fit (how long you\'ll happily wear them).',
+   flow:[
+     ['?','What\'s your goal?','Pick the branch below'],
+     ['●','Everyday / first BCI','→ Insight (5 ch, on in seconds)'],
+     ['●','Serious BCI on a budget','→ EPOC X (14 ch, the icon)'],
+     ['●','Publication research','→ FLEX (32 ch, full coverage)'],
+     ['●','All-day wellness','→ MN8 (EEG earbuds)']
+   ],
+   need:['Just your use-case — this one\'s a decision guide'],
+   steps:['<b>Insight</b> — 5 channels, on in seconds. Everyday BCI, focus tracking, first projects','<b>EPOC X</b> — 14 channels, the classic. Serious BCI and research on a budget; most stories here used one','<b>FLEX</b> — 32 channels, full-scalp coverage. Publication-grade research','<b>MN8</b> — EEG in earbuds. All-day focus and stress, looks like normal headphones','Already own one? You\'re holding the right one — the best headset is the one on your head'],
+   tips:['More channels = more brain coverage, but longer setup','Insight and MN8 are the fastest to live data'],
+   docs:[['⚖','Compare all hardware','Side-by-side specs','https://www.emotiv.com/comparison'],['🛒','Headsets overview','Insight · EPOC X · FLEX · MN8','https://www.emotiv.com/']]
+ },
+ /* ---------- NEW INTEGRATIONS ---------- */
+ 'dji-drone':{
+   title:'Fly a DJI Tello with your mind',
+   intro:'We built this at Emotiv Academy. Train a Mental Command, bridge it through Cortex, and send flight commands to a DJI Tello over Wi-Fi.',
+   flow:[
+     ['✦','Train "Push"','EmotivBCI — add Lift/Left/Right later'],
+     ['📡','Cortex com','Python reads the command stream'],
+     ['🔀','Map → SDK','command → djitellopy call'],
+     ['🚁','Tello flies','UDP over the drone\'s Wi-Fi']
+   ],
+   need:['DJI Tello or Tello EDU','Insight or EPOC X','EmotivBCI + a trained profile','Python + <code>djitellopy</code>','Your Cortex client id + secret'],
+   steps:['Train at least <b>Push</b> (forward); add Lift / Drop / Left / Right as accuracy improves','<code>pip install djitellopy</code> and connect your computer to the Tello\'s Wi-Fi','In Python: <code>from djitellopy import Tello; t=Tello(); t.connect(); t.takeoff()</code>','Open a Cortex WebSocket: authorize → createSession → subscribe <code>com</code>','When command is "push" and power &gt; 0.3, call <code>t.move_forward(30)</code>','Map more commands, and bind an emergency <code>t.land()</code> to a keypress'],
+   tips:['Fly in a large open space with a hand ready to land','Hover first; add movement once control is steady','A low battery makes the Tello drift — keep it charged'],
+   docs:[['🐙','DJITelloPy','Python Tello SDK wrapper','https://github.com/damiafuentes/DJITelloPy'],['⌘','Cortex — Advanced BCI','com stream in code','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['✦','EmotivBCI manual','Train the command','https://emotiv.gitbook.io/emotivbci/'],['▶','Emotiv Academy','Our drone build','https://www.youtube.com/@EmotivAcademy']],
+   note:'Fly responsibly: open space, clear of people, and always keep a manual land ready.'
+ },
+ 'spotify':{
+   title:'Control Spotify with your brain',
+   intro:'Skip, pause and play without lifting a finger — an Emotiv Academy favourite. Map Mental Commands or facial expressions to the Spotify Web API.',
+   flow:[
+     ['✦','Train','Commands or expressions (clench, smile)'],
+     ['📡','Cortex com/fac','Read the stream in Python'],
+     ['🎵','Spotify Web API','next / previous / play / pause'],
+     ['🔊','Playback changes','On your active device']
+   ],
+   need:['Spotify <b>Premium</b> (playback control needs it)','A Spotify developer app (client id + secret)','Insight or EPOC X','Python <code>spotipy</code>','Your Cortex app'],
+   steps:['Create an app at <b>developer.spotify.com</b>; note the client id/secret and set a redirect URI','<code>pip install spotipy</code> and authorise with scope <code>user-modify-playback-state</code>','Train commands (Push = next, Pull = previous) or use facial expressions (clench = play/pause)','Subscribe to <code>com</code> / <code>fac</code> via Cortex','Map events: on "push" call <code>sp.next_track()</code>; on clench toggle <code>sp.pause()</code> / <code>sp.start_playback()</code>','Add a cooldown so one thought equals one skip'],
+   tips:['Facial expressions are more reliable than commands for instant control','Keep your phone as a fallback while you tune thresholds'],
+   docs:[['🎵','Spotify Web API','Playback endpoints','https://developer.spotify.com/documentation/web-api'],['🐍','spotipy','Python Spotify client','https://spotipy.readthedocs.io/'],['📡','Cortex — Data subscription','com + fac','https://emotiv.gitbook.io/cortex-api/data-subscription'],['▶','Emotiv Academy','Our Spotify build','https://www.youtube.com/@EmotivAcademy']]
+ },
+ 'claude-desktop':{
+   title:'Wire your brain into Claude Desktop (MCP)',
+   intro:'Claude Desktop speaks MCP — the Model Context Protocol. Expose your live brain state as an MCP tool and Claude can read your focus, stress or commands. No API keys, all local.',
+   flow:[
+     ['📡','Cortex met/com','Your live brain state'],
+     ['🧩','Local MCP server','Node/Python exposes get_brain_state'],
+     ['🖥','Claude Desktop','Connects to your MCP server'],
+     ['💬','Ask Claude','"How\'s my focus?" → it calls your tool']
+   ],
+   need:['Claude Desktop app','An Emotiv headset + Cortex app','Node.js or Python','The MCP SDK (@modelcontextprotocol)'],
+   steps:['Build a small MCP server with the official SDK, exposing a tool like <code>get_brain_state</code>','Inside that tool, open a Cortex WebSocket and return the latest <code>met</code> (attention, stress, relaxation) or <code>com</code>','Register the server in Claude Desktop\'s <code>claude_desktop_config.json</code>','Restart Claude Desktop — your tool now appears','Ask "Am I focused right now?" and Claude calls the tool and reasons over your live brain data','Go further: have Claude log focus across a work session and suggest breaks'],
+   tips:['Keep the server local and return smoothed values','MCP is the clean, structured route — no brittle keystroke hacks','This uses Anthropic\'s consumer app, not the API'],
+   docs:[['🔌','Model Context Protocol','Build an MCP server','https://modelcontextprotocol.io/'],['🖥','Claude Desktop + MCP','Connect local servers','https://modelcontextprotocol.io/quickstart/user'],['📡','Cortex — Data subscription','met + com','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🛠','Emotiv developer','Cortex hub','https://www.emotiv.com/developer']],
+   note:'Non-API integration: Claude Desktop reads a local tool you own — your brain data never leaves your machine.'
+ },
+ 'chatgpt':{
+   title:'Drive ChatGPT hands-free with your mind',
+   intro:'A different route, no API. Use Mental Commands and facial expressions as an input bridge that types into — and dictates to — the ChatGPT desktop app.',
+   flow:[
+     ['✦','Train','Commands + an expression (clench)'],
+     ['📡','Cortex com/fac','Read the stream'],
+     ['⌨','OS bridge','Map → keystrokes / trigger dictation'],
+     ['💬','ChatGPT app','Receives input hands-free']
+   ],
+   need:['ChatGPT desktop app','Emotiv headset + Cortex','Python','An OS-automation lib (pynput, AppleScript, or AutoHotkey)'],
+   steps:['Train commands (Push = send, Pull = new line) and an expression (clench = activate voice)','Subscribe to <code>com</code> / <code>fac</code> via Cortex','Your bridge maps events: clench → trigger ChatGPT\'s voice/dictation; push → press Enter to send','Use blinks or expressions to accept or regenerate a response','Combine with OS dictation — speak the prompt, "send" it with a thought'],
+   tips:['Expressions beat commands for crisp discrete actions','This keyboard/voice-bridge pattern works with <i>any</i> app that has no EEG API','Contrast with the Claude build, which uses structured MCP tools'],
+   docs:[['⌘','Cortex — Advanced BCI','com + fac','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['⌨','pynput','Emulate keys from Python','https://pynput.readthedocs.io/'],['🔁','AutoHotkey','Windows automation','https://www.autohotkey.com/'],['▶','Emotiv Academy','BCI bridges','https://www.youtube.com/@EmotivAcademy']],
+   note:'Non-API integration: a thought/expression bridge that works with the consumer ChatGPT app via OS input.'
+ },
+ 'replit':{
+   title:'Build your BCI app on Replit',
+   intro:'No local project setup — prototype and host your Cortex integration in the browser on Replit, and let Replit Agent scaffold the boilerplate.',
+   flow:[
+     ['➕','New Repl','Python or Node'],
+     ['🔐','Secrets','client id + secret in the Secrets pane'],
+     ['⌘','Cortex client','WebSocket to local Cortex / Emotiv Cloud'],
+     ['🤖','Replit Agent','Scaffolds authorize→session→subscribe'],
+     ['🚀','Deploy','Share a live URL']
+   ],
+   need:['A Replit account','Your Cortex client id + secret','An Emotiv headset (Cortex runs locally with the headset)'],
+   steps:['Create a repl (Python or Node)','Store your client id/secret in <b>Replit Secrets</b> — never in code','Add a WebSocket client to talk to Cortex at <code>wss://localhost:6868</code> (Cortex runs on the machine with the headset)','Ask <b>Replit Agent</b> to scaffold the authorize → createSession → subscribe flow','Build your feature — chart metrics, fire webhooks, log focus — then Deploy for a shareable URL'],
+   tips:['Cortex runs locally, so pair Replit (app + logic) with a small local bridge, or stream via Emotiv Cloud for remote data','Keep every credential in the Secrets pane, out of your source'],
+   docs:[['⌘','Cortex API docs','Full reference','https://emotiv.gitbook.io/cortex-api/'],['🐙','cortex-example','Clone + adapt','https://github.com/Emotiv/cortex-example'],['🟠','Replit docs','Secrets, Agent, Deploy','https://docs.replit.com/'],['🛠','Emotiv developer','Cortex hub','https://www.emotiv.com/developer']]
+ }
+};
+
+/* ---------- TILES ---------- */
+const T=[
+ {id:'f1',size:'s22',pill:'World first',hot:true,img:'https://framerusercontent.com/images/aHvKS2bIYvEekkC8HT9z4Z9DKww.webp',fb:PX(5555813),
+   title:'He drove a Formula 1 car with his mind',sub:'Rodrigo Mendes · quadriplegic · EPOC',kicker:'Community story',media:{yt:'NhmXaeaHkDc'},
+   story:['Rodrigo Hübner Mendes was paralyzed at nineteen. Twenty-five years later he sat in an F1 cockpit — unable to touch the wheel or pedals — and drove it. An EPOC headset read his trained thoughts; a computer turned them into steering and acceleration.','He became the first person in history to drive a race car by mind. It wasn\'t a stunt — it was proof that assumed limits are rarely the real ones.'],
+   guide:'mental-command',create:'Create a Mental Command'},
+ {id:'elden',pill:'Gaming',img:'https://framerusercontent.com/images/oCBKBDlxjPavhPkn0AbE1TrRuqU.webp',fb:PX(2004161),
+   title:'She beat Elden Ring with brainwaves',kicker:'Community story',media:{img:'https://framerusercontent.com/images/oCBKBDlxjPavhPkn0AbE1TrRuqU.webp',cap:'Perrikaryal\'s custom EmotivBCI controller.'},
+   story:['Elden Ring is one of the hardest games ever made. Streamer Perrikaryal finished it — every boss — with no controller, mapping trained thoughts to attacks and dodges on an EPOC X. Then she beat the DLC.','Her point is accessibility: if a brain can win a boss fight, gaming opens up to people who can\'t use their hands.'],
+   guide:'game-controller',create:'Build a BCI game controller'},
+ {id:'setup',pill:'Guide · 5 min',img:PX(8866720),
+   title:'Set up your headset',sub:'Box to brainwaves in five minutes',kicker:'Getting started',
+   story:['Everything here starts the same way: a headset on your head and green dots on your screen. Here\'s the whole five-minute ritual.'],
+   guide:'setup',create:'Open the setup guide'},
+ {id:'mc',pill:'Guide · 2 min',img:PX(977601),
+   title:'Train your first Mental Command',sub:'Teach the system one thought',kicker:'Getting started',
+   story:['A Mental Command is one reproducible thought — "push", "lift" — that Studio learns to recognise. It\'s the atom every project on this screen is built from, and it takes about two minutes.'],
+   guide:'mental-command',create:'Start training'},
+ {id:'dji',size:'s21',pill:'Build · new',isnew:true,img:PX(5555813,1200,620),
+   title:'Fly a DJI drone with your mind',sub:'The Emotiv Academy build, step by step',kicker:'Integration guide',media:{img:PX(5555813,1200,620),cap:'Train a command, bridge Cortex, fly a Tello.'},
+   story:['One of our favourite Academy builds: train a single Mental Command, bridge it through the Cortex API, and send flight commands to a DJI Tello over Wi-Fi. It\'s the most satisfying "it actually moved" moment in BCI.'],
+   guide:'dji-drone',create:'Build the drone controller'},
+ {id:'spotify',pill:'Build · new',isnew:true,img:PX(6194264),
+   title:'Control Spotify with your brain',sub:'Skip & pause, hands-free',kicker:'Integration guide',
+   story:['Skip, pause and play without lifting a finger — an Emotiv Academy favourite. Map Mental Commands or facial expressions to the Spotify Web API and run your music by thought.'],
+   guide:'spotify',create:'Build the Spotify controller'},
+ {id:'replit',pill:'Build · new',isnew:true,img:PX(2004161),
+   title:'Build a BCI app on Replit',sub:'No local setup — code it in the browser',kicker:'Integration guide',
+   story:['Prototype and host your whole Cortex integration in the browser on Replit — and let Replit Agent scaffold the WebSocket boilerplate for you. The fastest way from idea to a shareable BCI app.'],
+   guide:'replit',create:'Start building on Replit'},
+ {id:'chatgpt',pill:'Build · new',isnew:true,img:PX(839465),
+   title:'Drive ChatGPT hands-free',sub:'A thought & expression input bridge',kicker:'Integration guide',
+   story:['No API needed. Turn Mental Commands and facial expressions into an input bridge that types into — and dictates to — the ChatGPT desktop app. Speak your prompt, send it with a thought.'],
+   guide:'chatgpt',create:'Build the ChatGPT bridge'},
+ {id:'claude',size:'s21',pill:'Build · new',isnew:true,img:PX(4884116,1200,620),
+   title:'Wire your brain into Claude Desktop',sub:'Expose your focus as an MCP tool',kicker:'Integration guide',media:{img:PX(4884116,1200,620),cap:'Claude Desktop reads a local brain-state tool you own.'},
+   story:['Claude Desktop speaks MCP — the Model Context Protocol. Build a tiny local server that exposes your live brain state, and Claude can read your focus, stress or commands. No API keys, nothing leaves your machine.'],
+   guide:'claude-desktop',create:'Build the MCP server'},
+ {id:'floyd',pill:'Immersive art',img:'https://framerusercontent.com/images/qc7muh5ICGRx4RCchMpiIp5Loo.webp',fb:PX(13230484),
+   title:'Your brain on Pink Floyd, on gallery walls',kicker:'Community story',media:{img:'https://framerusercontent.com/images/qc7muh5ICGRx4RCchMpiIp5Loo.webp',cap:'Brainstorms at Frameless, London.'},
+   story:['"Brainstorms: A Great Gig in the Sky" turned visitors\' live neural response to Pink Floyd into 30,000 sq ft of visuals, created with Gala Wright, daughter of the band\'s co-founder.'],
+   guide:'visualise',create:'Visualise your brainwaves'},
+ {id:'tonto',pill:'Music',img:'https://i.ytimg.com/vi/fY7K3QMQeS4/hqdefault.jpg',fb:PX(13230484),
+   title:'She played a legendary synth by thought',kicker:'Community story',media:{yt:'fY7K3QMQeS4'},
+   story:['TONTO is the room-sized synth behind Stevie Wonder\'s classics. AngieC became the first person to control it with brainwaves, wearing an EPOC — the recordings landed on her album Star Seeds.'],
+   guide:'music',create:'Make music with your mind'},
+ {id:'mindtunes',pill:'Music',img:'https://framerusercontent.com/images/ZC1XtFau07Cv8HgTpU1lazsEA.png',fb:PX(13230484),
+   title:'Three musicians made a track from their minds',kicker:'Community story',media:{yt:'wP5PXEaH_4E'},
+   story:['For MindTunes, DJ Fresh and a neuroscientist wired three musicians with physical disabilities straight into music software — and together they composed an original track from brainwaves alone.'],
+   guide:'music',create:'Make music with your mind'},
+ {id:'research',pill:'Research',img:PX(8533136),
+   title:'Cited in 22,000+ scholarly works',bignum:'22,000+',sub:'Tap for the research starter',kicker:'Science',
+   story:['Search "Emotiv" on Google Scholar and you\'ll find over twenty-two thousand results — from driver-fatigue detection to stroke rehab. The same signal pipeline is in your copy of Studio.'],
+   guide:'record-research',create:'Record & export data'},
+ {id:'rac',pill:'Road safety',img:'https://framerusercontent.com/images/y7PoKOhC7lqm5oWR2WKx5bBDlwI.png',fb:PX(771317),
+   title:'The car that slows when your mind wanders',kicker:'Community story',media:{yt:'D8WHS0T4N08'},
+   story:['Australia\'s RAC wired a Hyundai to its driver\'s attention: when the EPOC detected drift, the car slowed. The world\'s first attention-powered car.'],
+   guide:'attention',create:'Measure your attention'},
+ {id:'kids',pill:'Changing lives',img:'https://framerusercontent.com/images/lQdraJKSDX3UZtS98ae60KTF2dA.png',fb:PX(14864078),
+   title:'Kids painting their first pictures — with their brains',kicker:'Community story',media:{yt:'M9twu-8pX1w'},
+   story:['At children\'s hospitals across Canada, kids with disabilities use EPOC X to paint, play and switch on devices by thought. For many, it\'s the first task they\'ve ever done entirely on their own.'],
+   guide:'mental-command',create:'Feel a first command'},
+ {id:'torch',pill:'Paris 2024',hot:true,img:'https://framerusercontent.com/images/rJS6PDiaDEc4fkG4EECYpCVKw.webp',fb:PX(6141336),
+   title:'They carried the Olympic flame by brainpower',kicker:'Community story',media:{img:'https://framerusercontent.com/images/rJS6PDiaDEc4fkG4EECYpCVKw.webp',cap:'Prometheus BCI, Torch Relay 2024.'},
+   story:['At the 2024 Torch Relay, torchbearers with motor disabilities lifted a robotic exoskeleton arm using neural signals from an EPOC X, while MN8 earbuds monitored a family member\'s stress. The world watched.'],
+   guide:'mental-command',create:'Create a Mental Command'},
+ {id:'drone',pill:'World first',img:PX(5555813),
+   title:'16 pilots raced drones with pure focus',sub:'University of Florida, 2016',kicker:'Community story',
+   story:['The world\'s first brain-drone race: sixteen pilots flew down a court by imagining a cube moving forward. First place wore a 5-channel Insight — the same training you can do today.'],
+   guide:'mental-command',create:'Train "push" to fly'},
+ {id:'bb8',pill:'Maker project',img:'https://i.ytimg.com/vi/glxjoWliBBg/hqdefault.jpg',fb:PX(2004161),
+   title:'He moved a BB-8 droid like a Jedi',kicker:'Community story',media:{yt:'glxjoWliBBg'},
+   story:['Student Paul Barbaste wired an Insight headset through the Cortex API to a rolling BB-8 droid. Trained thoughts became motion — the Force, shipped in a box.'],
+   guide:'cortex',create:'Build with the Cortex API'},
+ {id:'which',pill:'Guide',img:PX(5208874),
+   title:'Which headset is right for you?',sub:'Insight · EPOC X · FLEX · MN8',kicker:'Getting started',
+   story:['Four headsets, one Studio. They differ in channels — how much of the brain you see — and fit. Here\'s the two-line version of each.'],
+   guide:'which-headset',create:'Compare headsets'}
+];
+
+const ORDER=['f1','elden','setup','mc','dji','spotify','replit','chatgpt','claude','floyd','tonto','mindtunes','research','rac','kids','torch','drone','bb8','which'];
+
+/* render grid */
+const bento=document.getElementById('bento');
+ORDER.map(id=>T.find(t=>t.id===id)).forEach(t=>{
+  const b=document.createElement('button');
+  b.className='tile '+(t.size||'');
+  let h='';
+  if(t.img)h+='<img class="bgimg" src="'+t.img+'" alt="" loading="lazy"'+(t.fb?' onerror="this.onerror=null;this.src=\''+t.fb+'\'"':'')+'>';
+  h+='<div class="scrim"></div><div class="inner">';
+  h+='<div class="toprow"><span class="pill'+(t.hot?' hot':'')+(t.isnew?' new':'')+'">'+t.pill+'</span>'+(t.media&&t.media.yt?'<span class="vtag">Watch</span>':'')+'</div>';
+  h+='<div>'+(t.bignum?'<div class="bignum">'+t.bignum+'</div>':'')+'<h3>'+t.title+'</h3>'+(t.sub?'<div class="sub">'+t.sub+'</div>':'')+'</div>';
+  h+='</div>';
+  b.innerHTML=h;
+  b.addEventListener('click',()=>openStory(t));
+  bento.appendChild(b);
+});
+
+/* drawer */
+const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop'),
+ dBody=document.getElementById('d-body'),dFoot=document.getElementById('d-foot'),
+ dKicker=document.getElementById('d-kicker'),dBack=document.getElementById('d-back');
+let currentTile=null;
+
+function mediaHTML(m){
+  if(!m)return'';
+  if(m.yt)return '<div class="d-media"><div class="vwrap" data-yt="'+m.yt+'"><img src="https://i.ytimg.com/vi/'+m.yt+'/hqdefault.jpg" alt=""><div class="pb"><span>▶</span></div></div></div>';
+  if(m.img)return '<div class="d-media"><img src="'+m.img+'" alt=""></div>';
+  return'';
+}
+function openStory(t){
+  currentTile=t;
+  dKicker.textContent=t.kicker;dBack.classList.remove('show');
+  let h=mediaHTML(t.media)||'';
+  h+='<h2>'+t.title+'</h2>';
+  (t.story||[]).forEach(p=>h+='<p>'+p+'</p>');
+  dBody.innerHTML=h;
+  dFoot.innerHTML='<button class="cta" id="mkbtn">'+(t.create||'Create')+' →</button>';
+  document.getElementById('mkbtn').addEventListener('click',()=>openGuide(t.guide));
+  const vw=dBody.querySelector('.vwrap[data-yt]');
+  if(vw)vw.addEventListener('click',()=>{vw.parentElement.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+vw.dataset.yt+'?autoplay=1&rel=0" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe>';},{once:true});
+  openDrawer();
+}
+const ARROW='<svg width="20" height="30" viewBox="0 0 20 30" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="1.5" x2="10" y2="18" stroke="#ff5c1a" stroke-width="4" stroke-linecap="round"/><path d="M2.5 16.5 L10 28 L17.5 16.5 Z" fill="#ff5c1a"/></svg>';
+function flowHTML(nodes){
+  let h='<div class="flow">';
+  nodes.forEach((n,i)=>{
+    h+='<div class="fnode'+(n[0]==='●'||n[0]==='?'?' branch':'')+'"><div class="fi">'+n[0]+'</div><div class="ft"><b>'+n[1]+'</b><span>'+n[2]+'</span></div></div>';
+    if(i<nodes.length-1)h+='<div class="fconn">'+ARROW+'</div>';
+  });
+  return h+'</div>';
+}
+function openGuide(id){
+  const g=G[id];if(!g)return;
+  dKicker.textContent='How to build it';dBack.classList.add('show');
+  let h='';
+  if(g.video)h+='<div class="d-media"><div class="vwrap" data-yt="'+g.video+'"><img src="https://i.ytimg.com/vi/'+g.video+'/hqdefault.jpg" alt=""><div class="pb"><span>▶</span></div></div></div>';
+  h+='<h2>'+g.title+'</h2><p>'+g.intro+'</p>';
+  if(g.flow){h+='<div class="sect">How it flows</div>'+flowHTML(g.flow);}
+  if(g.need){h+='<div class="sect">What you\'ll need</div><ul class="plain">'+g.need.map(x=>'<li>'+x+'</li>').join('')+'</ul>';}
+  if(g.steps){h+='<div class="sect">Step by step</div><ol class="steps">'+g.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol>';}
+  if(g.tips){h+='<div class="sect">Tips</div><ul class="plain">'+g.tips.map(x=>'<li>'+x+'</li>').join('')+'</ul>';}
+  if(g.note)h+='<div class="note"><span>ℹ️</span><span>'+g.note+'</span></div>';
+  if(g.docs){h+='<div class="sect">Docs &amp; references</div><div class="docs">'+g.docs.map(d=>'<a href="'+d[3]+'" target="_blank" rel="noopener"><span class="di">'+d[0]+'</span><span class="dt">'+d[1]+'<span class="dg" style="display:block;font-weight:400">'+d[2]+'</span></span><span class="dx">↗</span></a>').join('')+'</div>';}
+  dBody.innerHTML=h;
+  dFoot.innerHTML='<a class="cta" href="https://www.emotiv.com/developer" target="_blank" rel="noopener">Open EMOTIV Developer →</a><button class="cta ghost" id="backbtn">‹ Back to the story</button>';
+  document.getElementById('backbtn').addEventListener('click',()=>openStory(currentTile));
+  const vw=dBody.querySelector('.vwrap[data-yt]');
+  if(vw)vw.addEventListener('click',()=>{vw.parentElement.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+vw.dataset.yt+'?autoplay=1&rel=0" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe>';},{once:true});
+  dBody.scrollTop=0;
+}
+function openDrawer(){drawer.classList.add('on');backdrop.classList.add('on');dBody.scrollTop=0;}
+function closeDrawer(){drawer.classList.remove('on');backdrop.classList.remove('on');}
+dBack.addEventListener('click',()=>openStory(currentTile));
+document.getElementById('d-close').addEventListener('click',closeDrawer);
+backdrop.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+</script>
+</body>
+</html>

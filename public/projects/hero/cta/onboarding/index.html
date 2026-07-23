@@ -53,10 +53,11 @@
   }
   .wordmark { width: 118px; height: 16px; color: var(--ink); }
   .progress {
-    width: min(320px, 60vw); height: 2px; background: rgba(255,255,255,0.12); border-radius: 1px;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+    height: 2px; background: rgba(255,255,255,0.07);
   }
   .progress i {
-    display: block; height: 100%; background: var(--blue); border-radius: 1px;
+    display: block; height: 100%; background: var(--blue);
     width: 0%; transition: width .45s cubic-bezier(.4,0,.2,1);
   }
 
@@ -186,8 +187,8 @@
 
 <header>
   <svg viewBox="0 0 121 16" class="wordmark" fill="currentColor" id="logo"></svg>
-  <div class="progress"><i id="bar"></i></div>
 </header>
+<div class="progress"><i id="bar"></i></div>
 
 <main id="stage"></main>
 
@@ -413,7 +414,7 @@ document.addEventListener("keydown", e => {
 });
 
 /* logo */
-fetch("/projects/onboarding/draft-1/logo.svg").then(r => r.text()).then(t => {
+fetch("./logo.svg").then(r => r.text()).then(t => {
   const tmp = document.createElement("div");
   tmp.innerHTML = t;
   const svg = tmp.querySelector("svg");
