@@ -236,6 +236,7 @@
     border-radius: 10px 10px 0 0; font-size: 12.5px; color: #3c4043;
   }
   .chrome-tab .tab-fav { width: 15px; height: 15px; flex: 0 0 auto; }
+  .chrome-tab span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .chrome-tab .tab-close { margin-left: auto; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #5f6368; }
   .chrome-tab .tab-close:hover { background: rgba(0,0,0,0.08); }
   .chrome-newtab-btn { pointer-events: auto; width: 26px; height: 26px; margin: 0 0 4px 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #5f6368; }
@@ -856,8 +857,8 @@ function openChrome(forceNew) {
     title: "Emotiv",
     className: "chrome-win",
     titleCenter: false,
-    w: Math.min(1024, window.innerWidth - 160),
-    h: Math.min(680, window.innerHeight - 140),
+    w: Math.min(1320, window.innerWidth - 100),
+    h: Math.min(840, window.innerHeight - 90),
     titlebarExtra: `
       <div class="chrome-tabs">
         <div class="chrome-tab" data-nodrag>
