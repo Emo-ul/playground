@@ -898,9 +898,11 @@ function openChrome(forceNew) {
     if (!t || !needsWide(t.url)) {
       contentEl.style.overflow = "auto";
       frame.style.width = "100%"; frame.style.height = "100%"; frame.style.transform = "";
+      frame.style.alignSelf = "";
       return;
     }
     contentEl.style.overflow = "hidden";
+    frame.style.alignSelf = "flex-start";
     const s = Math.min(1, contentEl.clientWidth / WIDE_BASE);
     frame.style.width = WIDE_BASE + "px";
     frame.style.height = (contentEl.clientHeight / s) + "px";
