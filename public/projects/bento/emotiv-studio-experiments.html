@@ -275,7 +275,7 @@ function openOverview(t){
   h+='<div class="sect">What you\'ll see</div><div class="expect"><span>✨</span><span class="e-t">'+t.expect+'</span></div>';
   dBody.innerHTML=h;
   dFoot.innerHTML='<button class="cta" id="setupbtn">Set up this experiment →</button>';
-  document.getElementById('setupbtn').addEventListener('click',()=>openGuide(t));
+  document.getElementById('setupbtn').addEventListener('click',()=>{location.href='requirements.html';});
   drawer.classList.add('on');backdrop.classList.add('on');dBody.scrollTop=0;
 }
 function openGuide(t){

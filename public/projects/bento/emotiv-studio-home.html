@@ -463,7 +463,7 @@ function openStory(t){
   (t.story||[]).forEach(p=>h+='<p>'+p+'</p>');
   dBody.innerHTML=h;
   dFoot.innerHTML='<button class="cta" id="mkbtn">'+(t.create||'Create')+' →</button>';
-  document.getElementById('mkbtn').addEventListener('click',()=>openGuide(t.guide));
+  document.getElementById('mkbtn').addEventListener('click',()=>{location.href='requirements.html';});
   const vw=dBody.querySelector('.vwrap[data-yt]');
   if(vw)vw.addEventListener('click',()=>{vw.parentElement.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+vw.dataset.yt+'?autoplay=1&rel=0" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe>';},{once:true});
   openDrawer();
