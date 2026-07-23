@@ -1132,7 +1132,7 @@ html body { background: rgb(255, 255, 255); }
 <script>(function(){const S=JSON.parse(document.getElementById('m-states').textContent);const host=document.getElementById('m-navhost');const VW="<div class=\"ssr-variant hidden-1ka7n8p hidden-1owu136 hidden-188hajf hidden-fwhst4\">";let cur=null;const apply=ops=>{for(const o of ops){let n=host.querySelector('nav');for(const i of o.p)n=n.children[i];if(o.t==='html')n.outerHTML=o.h;else if(o.t==='inner')n.innerHTML=o.h;else if(o.t==='attr'){for(const nm of (o.rm||[]))n.removeAttribute(nm);for(const kv of o.set)n.setAttribute(kv[0],kv[1])}}};const render=(menu,item)=>{if(!menu){host.innerHTML=S.closed;cur=null;return}const M=S.menus[menu];host.innerHTML=VW+M.nav+'</div>';if(item&&item!==M.items[0].label){const it=M.items.find(x=>x.label===item);if(it)apply(it.ops)}cur={menu:menu,item:item||M.items[0].label}};render(null);host.addEventListener('pointerover',e=>{const tr=e.target.closest('[data-m-trigger]');if(tr){e._mSeen=1;const l=tr.getAttribute('data-m-trigger');if(!cur||cur.menu!==l)render(l);return}const it=e.target.closest('[data-m-item]');if(it&&cur){e._mSeen=1;const l=it.getAttribute('data-m-item');if(cur.item!==l)render(cur.menu,l);return}if(e.target.closest('[data-framer-name="overlay"]')){e._mSeen=1;render(null);return}if(cur)e._mSeen=1});document.addEventListener('pointerover',e=>{if(e._mSeen)return;if(cur&&!host.contains(e.target))render(null)});document.addEventListener('keydown',e=>{if(e.key==='Escape')render(null)});document.addEventListener('click',e=>{const a=e.target.closest('a');if(a){e.preventDefault();e.stopImmediatePropagation()}},true);const vids=()=>{document.querySelectorAll('video').forEach(v=>{v.muted=true;v.loop=true;v.playsInline=true;v.autoplay=true;const p=v.play();if(p&&p.catch)p.catch(()=>{})})};vids();document.addEventListener('visibilitychange',vids);window.addEventListener('pageshow',vids)})();</script>
 
 <script id="cta-experiment">
-/* Playground experiment: nav CTA — "Shop Now" (blue) → "Shop" (white outline) + "Start Now" (blue).
+/* Playground experiment: nav CTA — "Shop Now" (blue) → "Shop" (white outline) + "Start Now" (blue), side by side.
    Runs on live DOM and re-applies after the menu runtime swaps nav content. */
 (function () {
   var SEL = 'a[data-framer-name="solid 44-medium"]';
@@ -1150,14 +1150,20 @@ html body { background: rgb(255, 255, 255); }
     b.setAttribute("data-cta-done", "1");
     b.style.backgroundColor = "rgb(51,99,255)";
     b.style.setProperty("--border-color", "rgba(255,255,255,0.08)");
-    b.style.marginLeft = "8px";
     b.removeAttribute("href");
     b.querySelectorAll("p.framer-text").forEach(function (p) {
       p.textContent = "Start Now";
       p.style.color = "rgb(255,255,255)";
       p.style.setProperty("--framer-text-color", "rgb(255,255,255)");
     });
-    a.after(b);
+    var wrap = document.createElement("span");
+    wrap.style.display = "inline-flex";
+    wrap.style.alignItems = "center";
+    wrap.style.gap = "8px";
+    wrap.style.flexWrap = "nowrap";
+    a.replaceWith(wrap);
+    wrap.appendChild(a);
+    wrap.appendChild(b);
   }
   function applyAll() { document.querySelectorAll(SEL).forEach(restyle); }
   applyAll();

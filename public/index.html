@@ -886,8 +886,28 @@ function openChrome(forceNew) {
   const frame = w.el.querySelector(".site-frame");
   const omni = w.el.querySelector(".omnibox input");
   const strip = w.el.querySelector(".chrome-tabs");
+  const contentEl = w.el.querySelector(".chrome-content");
   w.tabs = []; w.tabSeq = 0; w.activeTab = null;
   w.frame = frame;
+
+  /* pages captured desktop-only (>=1440px) render in a virtual 1440px viewport, scaled to fit */
+  const WIDE_BASE = 1440;
+  const needsWide = url => url.startsWith("/projects/hero");
+  function fitFrame() {
+    const t = w.tabs.find(x => x.id === w.activeTab);
+    if (!t || !needsWide(t.url)) {
+      contentEl.style.overflow = "auto";
+      frame.style.width = "100%"; frame.style.height = "100%"; frame.style.transform = "";
+      return;
+    }
+    contentEl.style.overflow = "hidden";
+    const s = Math.min(1, contentEl.clientWidth / WIDE_BASE);
+    frame.style.width = WIDE_BASE + "px";
+    frame.style.height = (contentEl.clientHeight / s) + "px";
+    frame.style.transform = `scale(${s})`;
+    frame.style.transformOrigin = "0 0";
+  }
+  new ResizeObserver(fitFrame).observe(contentEl);
 
   const prettyUrl = url =>
     url === "/ntp.html" ? "" :
@@ -930,6 +950,7 @@ function openChrome(forceNew) {
     w.activeTab = id;
     if (frame.getAttribute("src") !== t.url) frame.setAttribute("src", t.url);
     omni.value = prettyUrl(t.url);
+    fitFrame();
     renderTabs();
   }
   function closeTab(id) {
@@ -958,6 +979,7 @@ function openChrome(forceNew) {
       if (fav) t.fav = fav;
       frame.setAttribute("src", url);
       omni.value = prettyUrl(url);
+      fitFrame();
       renderTabs();
     }
   };
