@@ -253,6 +253,15 @@ export default {
     }
 
     /* ----- proxied assets ----- */
+    if (path === "/data-icon.svg") {
+      const r = await fetch("https://www.gstatic.com/analytics-lego/svg/ic_looker_studio.svg",
+        { cf: { cacheEverything: true, cacheTtl: 86400 } });
+      return new Response(r.body, {
+        status: r.status,
+        headers: { "content-type": "image/svg+xml", "cache-control": "public, max-age=86400" }
+      });
+    }
+
     if (path === "/studio-icon.png") {
       const r = await fetch(STUDIO_ICON, { cf: { cacheEverything: true, cacheTtl: 86400 } });
       const h = new Headers(r.headers);

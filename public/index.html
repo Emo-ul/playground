@@ -101,6 +101,59 @@
   }
 
   .app-icon-img { width: 100%; height: 100%; border-radius: 22.5%; display: block; }
+  .flat-icon-img { width: 100%; height: 100%; display: block; }
+
+  /* ---------- Data (Looker Studio lookalike) ---------- */
+  .data-win .win-body { background: #f8f9fa; color: #202124; }
+  .lk-bar {
+    height: 52px; flex: 0 0 auto; background: #fff; border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  }
+  .lk-bar img { width: 24px; height: 24px; }
+  .lk-title { font-size: 15px; font-weight: 500; color: #202124; }
+  .lk-bar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .lk-daterange {
+    display: flex; align-items: center; gap: 6px; border: 1px solid #dadce0; border-radius: 4px;
+    padding: 5px 10px; font-size: 13px; color: #3c4043; background: #fff;
+  }
+  .lk-share {
+    background: #1a73e8; color: #fff; border: none; border-radius: 4px;
+    padding: 7px 16px; font-size: 13px; font-weight: 500;
+  }
+  .lk-share:hover { background: #1765cc; }
+  .lk-avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #7b6ad4, #3b4db3);
+    color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+  }
+  .lk-canvas {
+    flex: 1; overflow: auto; padding: 16px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 16px;
+    align-content: start;
+  }
+  .lk-card {
+    background: #fff; border: 1px solid #dadce0; border-radius: 8px;
+    padding: 14px 16px 10px; box-shadow: 0 1px 2px rgba(60,64,67,0.08);
+    display: flex; flex-direction: column; min-height: 330px;
+  }
+  .lk-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 10px; flex-wrap: wrap; }
+  .lk-card-title { font-size: 14px; font-weight: 500; color: #202124; }
+  .lk-seg { display: flex; border: 1px solid #dadce0; border-radius: 15px; overflow: hidden; }
+  .lk-seg div { padding: 4px 13px; font-size: 12px; color: #5f6368; cursor: default; }
+  .lk-seg div:not(:last-child) { border-right: 1px solid #dadce0; }
+  .lk-seg div.sel { background: #e8f0fe; color: #1967d2; font-weight: 500; }
+  .lk-seg div:not(.sel):hover { background: #f1f3f4; }
+  .lk-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .lk-chip {
+    padding: 4px 12px; font-size: 12px; color: #5f6368;
+    border: 1px solid #dadce0; border-radius: 15px; cursor: default;
+  }
+  .lk-chip.sel { background: #e8f0fe; color: #1967d2; border-color: #d2e3fc; font-weight: 500; }
+  .lk-chip:not(.sel):hover { background: #f1f3f4; }
+  .lk-legend { display: flex; gap: 14px; margin: 2px 0 4px; flex-wrap: wrap; }
+  .lk-legend span { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #5f6368; }
+  .lk-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .lk-chart { flex: 1; min-height: 0; }
+  .lk-chart svg { width: 100%; height: 100%; display: block; }
 
   /* EMOTIV Studio window (always dark) */
   .studio-win { background: #0a0a0c; }
@@ -486,6 +539,10 @@
 <div class="desk-icon" id="icon-studio" style="top: 170px; right: 24px;">
   <div class="glyph"><img src="/studio-icon.png" alt="" class="app-icon-img"></div>
   <div class="label">Emotiv Studio</div>
+</div>
+<div class="desk-icon" id="icon-data" style="top: 292px; right: 24px;">
+  <div class="glyph" style="padding: 3px;"><img src="/data-icon.svg" alt="" class="flat-icon-img"></div>
+  <div class="label">Data</div>
 </div>
 
 <!-- ===== Dock ===== -->
@@ -966,6 +1023,187 @@ function openStudio() {
   });
 }
 
+/* ---------- Data window (Looker Studio lookalike) ---------- */
+const LK_DEVICES = ["MN8", "Insight", "Epoc X", "Flex 2"];
+const LK_COLORS = ["#4285F4", "#EA4335", "#FBBC04", "#34A853"];
+const LK_PRODUCTS = ["All", "Emotiv Studio", "EmotivPro", "Brainwear"];
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function lkGenData() {
+  const rng = mulberry32(20260720);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const dayLabels = [], now = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    dayLabels.push(months[d.getMonth()] + " " + d.getDate());
+  }
+  const daily = dayLabels.map((label, i) => {
+    const weekend = ((i + now.getDay() - 29) % 7 + 7) % 7;
+    const dip = (weekend === 0 || weekend === 6) ? 0.55 : 1;
+    return { label, values: [
+      Math.round((55 + rng() * 30) * dip),
+      Math.round((38 + rng() * 22) * dip),
+      Math.round((24 + rng() * 18) * dip),
+      Math.round((12 + rng() * 12) * dip)
+    ]};
+  });
+  const monthly = months.map((label, i) => {
+    const g = 1 + i * 0.055;
+    return { label, values: [
+      Math.round((1450 + rng() * 350) * g),
+      Math.round((980 + rng() * 260) * g),
+      Math.round((640 + rng() * 200) * g),
+      Math.round((330 + rng() * 140) * g)
+    ]};
+  });
+  const sessions = {};
+  const base = { "Emotiv Studio": [150, 90], "EmotivPro": [260, 120], "Brainwear": [110, 70] };
+  Object.keys(base).forEach(k => {
+    sessions[k] = dayLabels.map((_, i) => {
+      const weekend = ((i + now.getDay() - 29) % 7 + 7) % 7;
+      const dip = (weekend === 0 || weekend === 6) ? 0.6 : 1;
+      return Math.round((base[k][0] + rng() * base[k][1] + i * 1.6) * dip);
+    });
+  });
+  sessions["All"] = dayLabels.map((_, i) =>
+    sessions["Emotiv Studio"][i] + sessions["EmotivPro"][i] + sessions["Brainwear"][i]);
+  return { daily, monthly, dayLabels, sessions };
+}
+
+function lkNiceMax(v) {
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  for (const m of [1, 2, 2.5, 5, 10]) if (v <= m * p) return m * p;
+  return 10 * p;
+}
+function lkFmt(v) { return v >= 1000 ? (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + "K" : String(v); }
+
+function lkAxes(W, H, padL, padB, padT, maxY) {
+  let s = "";
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (H - padT - padB) * (i / 4);
+    const val = Math.round(maxY * (1 - i / 4));
+    s += `<line x1="${padL}" y1="${y}" x2="${W - 8}" y2="${y}" stroke="${i === 4 ? "#dadce0" : "#f1f3f4"}" stroke-width="1"/>`;
+    s += `<text x="${padL - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="#80868b">${lkFmt(val)}</text>`;
+  }
+  return s;
+}
+
+function lkRenderStacked(el, data) {
+  const W = 520, H = 250, padL = 40, padB = 22, padT = 6;
+  const maxY = lkNiceMax(Math.max(...data.map(d => d.values.reduce((a, b) => a + b, 0))));
+  const plotW = W - padL - 8, plotH = H - padT - padB;
+  const step = plotW / data.length, bw = step * 0.62;
+  let s = lkAxes(W, H, padL, padB, padT, maxY);
+  data.forEach((d, i) => {
+    let y = H - padB;
+    d.values.forEach((v, k) => {
+      const h = (v / maxY) * plotH;
+      y -= h;
+      s += `<rect x="${padL + i * step + (step - bw) / 2}" y="${y}" width="${bw}" height="${h}" fill="${LK_COLORS[k]}"><title>${d.label} — ${LK_DEVICES[k]}: ${v}</title></rect>`;
+    });
+    const every = data.length > 14 ? 5 : 1;
+    if (i % every === 0) {
+      s += `<text x="${padL + i * step + step / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#80868b">${d.label}</text>`;
+    }
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${s}</svg>`;
+}
+
+function lkRenderSessions(el, labels, values) {
+  const W = 520, H = 250, padL = 44, padB = 22, padT = 6;
+  const maxY = lkNiceMax(Math.max(...values));
+  const plotW = W - padL - 8, plotH = H - padT - padB;
+  const pts = values.map((v, i) => [
+    padL + (i / (values.length - 1)) * plotW,
+    H - padB - (v / maxY) * plotH
+  ]);
+  const line = pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  let s = lkAxes(W, H, padL, padB, padT, maxY);
+  s += `<polygon points="${padL},${H - padB} ${line} ${padL + plotW},${H - padB}" fill="rgba(66,133,244,0.12)"/>`;
+  s += `<polyline points="${line}" fill="none" stroke="#4285F4" stroke-width="2"/>`;
+  pts.forEach((p, i) => {
+    if (i % 5 === 0 || i === pts.length - 1) {
+      s += `<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="#4285F4"/>`;
+      s += `<text x="${p[0]}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#80868b">${labels[i]}</text>`;
+    }
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${s}</svg>`;
+}
+
+function openData() {
+  const existing = findWin("data-win");
+  if (existing) {
+    existing.minimized ? restoreWindow(existing.id) : focusWindow(existing.id);
+    return;
+  }
+  const legend = LK_DEVICES.map((d, i) =>
+    `<span><i style="background:${LK_COLORS[i]}"></i>${d}</span>`).join("");
+  const chips = LK_PRODUCTS.map((p, i) =>
+    `<div class="lk-chip ${i === 0 ? "sel" : ""}" data-p="${p}">${p}</div>`).join("");
+  const w = createWindow({
+    title: "Data",
+    className: "data-win",
+    w: Math.min(1120, window.innerWidth - 140),
+    h: Math.min(700, window.innerHeight - 120),
+    content: `
+      <div class="lk-bar" data-nodrag>
+        <img src="/data-icon.svg" alt="">
+        <span class="lk-title">Emotiv Usage — Overview</span>
+        <div class="lk-bar-right">
+          <div class="lk-daterange">Last 30 days <span style="font-size:9px">▼</span></div>
+          <button class="lk-share">Share</button>
+          <div class="lk-avatar">U</div>
+        </div>
+      </div>
+      <div class="lk-canvas" data-nodrag>
+        <div class="lk-card">
+          <div class="lk-card-head">
+            <span class="lk-card-title">Devices used</span>
+            <div class="lk-seg" id="lk-mode">
+              <div class="sel" data-m="daily">Daily</div>
+              <div data-m="monthly">Monthly</div>
+            </div>
+          </div>
+          <div class="lk-legend">${legend}</div>
+          <div class="lk-chart" id="lk-devices"></div>
+        </div>
+        <div class="lk-card">
+          <div class="lk-card-head">
+            <span class="lk-card-title">Active user sessions</span>
+            <div class="lk-chips" id="lk-filter">${chips}</div>
+          </div>
+          <div class="lk-chart" id="lk-sessions"></div>
+        </div>
+      </div>`,
+    onClose: updateDockDots
+  });
+
+  const D = lkGenData();
+  const devEl = w.el.querySelector("#lk-devices");
+  const sesEl = w.el.querySelector("#lk-sessions");
+  lkRenderStacked(devEl, D.daily);
+  lkRenderSessions(sesEl, D.dayLabels, D.sessions["All"]);
+
+  w.el.querySelectorAll("#lk-mode div").forEach(btn => btn.addEventListener("click", () => {
+    w.el.querySelectorAll("#lk-mode div").forEach(b => b.classList.remove("sel"));
+    btn.classList.add("sel");
+    lkRenderStacked(devEl, btn.dataset.m === "monthly" ? D.monthly : D.daily);
+  }));
+  w.el.querySelectorAll("#lk-filter .lk-chip").forEach(chip => chip.addEventListener("click", () => {
+    w.el.querySelectorAll("#lk-filter .lk-chip").forEach(c => c.classList.remove("sel"));
+    chip.classList.add("sel");
+    lkRenderSessions(sesEl, D.dayLabels, D.sessions[chip.dataset.p]);
+  }));
+}
+
 /* ---------- Desktop icons ---------- */
 function wireDesktopIcon(el, open) {
   el.addEventListener("click", e => {
@@ -977,6 +1215,7 @@ function wireDesktopIcon(el, open) {
 }
 wireDesktopIcon(document.getElementById("icon-chrome"), () => openChrome(false));
 wireDesktopIcon(document.getElementById("icon-studio"), openStudio);
+wireDesktopIcon(document.getElementById("icon-data"), openData);
 document.getElementById("desktop").addEventListener("mousedown", () => {
   document.querySelectorAll(".desk-icon").forEach(i => i.classList.remove("selected"));
 });
