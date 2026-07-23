@@ -46,10 +46,17 @@ automatically (worker runs first; only /login, /oauth/*, /favicon.png are public
 
 Style note: it's "Emotiv", never "EMOTIV".
 
+## Projects
+
+- `hero/baseline` — static emotiv.com header+hero clone, untouched (source:
+  ~/Documents/Playground/static header/). Stored for future use.
+- `hero/cta` — same, with injected nav CTA experiment: "Shop" (white outline)
+  + "Start Now" (blue), re-applied via MutationObserver over menu swaps.
+
+The mock Chrome's new-tab page (`public/ntp.html`) mimics Google search +
+recent pages and links to both hero builds via postMessage to the shell.
+
 ## Pending
 
-- Chrome new-tab screen (google-ish search + recent pages) listing hero
-  variants: `hero/baseline` (as-is) and `hero/cta` ("Shop" white outline +
-  blue "Start Now"). Blocked: waiting for `emotiv-hero-clone.html` and the
-  4 customer-stories HTMLs to appear in ~/Playground.
+- Customer-stories project (4 HTMLs) — files not yet received.
 - Replace the Apple logo in the menu bar with Uldis's logo (asset pending).

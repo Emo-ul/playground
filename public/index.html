@@ -237,6 +237,11 @@
   }
   .chrome-tab .tab-fav { width: 15px; height: 15px; flex: 0 0 auto; }
   .chrome-tab span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chrome-tab.inactive { background: transparent; }
+  .chrome-tab.inactive:hover { background: rgba(255,255,255,0.45); }
+  .chrome-tab.inactive span { color: #5f6368; }
+  body.dark .chrome-tab.inactive:hover { background: rgba(255,255,255,0.08); }
+  body.dark .chrome-tab.inactive span { color: #9aa0a6; }
   .chrome-tab .tab-close { margin-left: auto; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #5f6368; }
   .chrome-tab .tab-close:hover { background: rgba(0,0,0,0.08); }
   .chrome-newtab-btn { pointer-events: auto; width: 26px; height: 26px; margin: 0 0 4px 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #5f6368; }
@@ -853,40 +858,123 @@ function openChrome(forceNew) {
     existing.minimized ? restoreWindow(existing.id) : focusWindow(existing.id);
     return;
   }
-  createWindow({
-    title: "Emotiv",
+  const w = createWindow({
+    title: "Chrome",
     className: "chrome-win",
     titleCenter: false,
     w: Math.min(1320, window.innerWidth - 100),
     h: Math.min(840, window.innerHeight - 90),
-    titlebarExtra: `
-      <div class="chrome-tabs">
-        <div class="chrome-tab" data-nodrag>
-          <img class="tab-fav" src="/favicon.png" alt="">
-          <span>Emotiv | Advanced Brain Data</span>
-          <div class="tab-close">×</div>
-        </div>
-        <div class="chrome-newtab-btn">+</div>
-      </div>`,
+    titlebarExtra: `<div class="chrome-tabs"></div>`,
     content: `
       <div class="chrome-toolbar">
         <div class="c-nav-btn dis">←</div>
         <div class="c-nav-btn dis">→</div>
-        <div class="c-nav-btn">⟳</div>
+        <div class="c-nav-btn" data-act="reload">⟳</div>
         <div class="omnibox">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input value="https://www.emotiv.com" spellcheck="false">
+          <input spellcheck="false" placeholder="Search or type a URL">
         </div>
         <div class="c-nav-btn">⋮</div>
         <div class="chrome-avatar">U</div>
       </div>
       <div class="chrome-content">
-        <iframe class="site-frame" src="/emotiv/" title="Emotiv"></iframe>
+        <iframe class="site-frame" src="about:blank" title="page"></iframe>
       </div>`,
     onClose: updateDockDots
   });
+
+  const frame = w.el.querySelector(".site-frame");
+  const omni = w.el.querySelector(".omnibox input");
+  const strip = w.el.querySelector(".chrome-tabs");
+  w.tabs = []; w.tabSeq = 0; w.activeTab = null;
+  w.frame = frame;
+
+  const prettyUrl = url =>
+    url === "/ntp.html" ? "" :
+    url === "/emotiv/" ? "https://www.emotiv.com" :
+    location.origin + url;
+  const activeTabObj = () => w.tabs.find(t => t.id === w.activeTab);
+
+  function renderTabs() {
+    strip.innerHTML = "";
+    w.tabs.forEach(t => {
+      const el = document.createElement("div");
+      el.className = "chrome-tab" + (t.id === w.activeTab ? "" : " inactive");
+      el.setAttribute("data-nodrag", "");
+      el.innerHTML = (t.fav === "ntp"
+        ? '<div class="tab-fav"><div class="chrome-logo"></div></div>'
+        : `<img class="tab-fav" src="${t.fav}" alt="">`)
+        + `<span>${t.title}</span><div class="tab-close">×</div>`;
+      el.addEventListener("mousedown", e => e.stopPropagation());
+      el.addEventListener("click", e => {
+        if (e.target.classList.contains("tab-close")) closeTab(t.id);
+        else activateTab(t.id);
+      });
+      strip.appendChild(el);
+    });
+    const plus = document.createElement("div");
+    plus.className = "chrome-newtab-btn";
+    plus.textContent = "+";
+    plus.setAttribute("data-nodrag", "");
+    plus.addEventListener("mousedown", e => e.stopPropagation());
+    plus.addEventListener("click", () => newTab("/ntp.html", "New Tab", "ntp", true));
+    strip.appendChild(plus);
+  }
+  function newTab(url, title, fav, lock) {
+    const t = { id: ++w.tabSeq, url, title, fav, lock: !!lock };
+    w.tabs.push(t);
+    activateTab(t.id);
+  }
+  function activateTab(id) {
+    const t = w.tabs.find(x => x.id === id); if (!t) return;
+    w.activeTab = id;
+    if (frame.getAttribute("src") !== t.url) frame.setAttribute("src", t.url);
+    omni.value = prettyUrl(t.url);
+    renderTabs();
+  }
+  function closeTab(id) {
+    const i = w.tabs.findIndex(x => x.id === id);
+    if (i < 0) return;
+    const wasActive = w.tabs[i].id === w.activeTab;
+    w.tabs.splice(i, 1);
+    if (!w.tabs.length) { closeWindow(w.id); return; }
+    if (wasActive) activateTab(w.tabs[Math.max(0, i - 1)].id);
+    else renderTabs();
+  }
+  w.el.querySelector('[data-act="reload"]').addEventListener("click", () =>
+    frame.setAttribute("src", frame.getAttribute("src")));
+  frame.addEventListener("load", () => {
+    try {
+      const title = frame.contentDocument.title;
+      const t = activeTabObj();
+      if (t && title && !t.lock) { t.title = title; renderTabs(); }
+    } catch (e) {}
+  });
+  w.chromeApi = {
+    navigate(url, title, fav) {
+      const t = activeTabObj(); if (!t) return;
+      t.url = url; t.lock = !!title;
+      if (title) t.title = title;
+      if (fav) t.fav = fav;
+      frame.setAttribute("src", url);
+      omni.value = prettyUrl(url);
+      renderTabs();
+    }
+  };
+
+  newTab("/emotiv/", "Emotiv | Advanced Brain Data", "/favicon.png", true);
   updateDockDots();
 }
+
+/* NTP tiles → shell navigation */
+window.addEventListener("message", e => {
+  if (!e.data || e.data.type !== "pg-navigate") return;
+  windows.forEach(w => {
+    if (w.frame && w.frame.contentWindow === e.source && w.chromeApi) {
+      w.chromeApi.navigate(e.data.url, e.data.title, e.data.fav || "/favicon.png");
+    }
+  });
+});
 
 /* ---------- Settings window ---------- */
 const SETTINGS_SECTIONS = [
