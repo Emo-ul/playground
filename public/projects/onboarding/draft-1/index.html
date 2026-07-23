@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get started — Emotiv</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #09153B;
+    --blue: #3363FF;
+    --blue-press: #1C4AE2;
+    --ink: #ECEEF6;
+    --muted: rgba(236, 238, 246, 0.62);
+    --line: rgba(255, 255, 255, 0.14);
+    --glass: rgba(255, 255, 255, 0.05);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: #070E28;
+    color: var(--ink);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+  }
+
+  /* ---- background glows ---- */
+  .bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; }
+  .bg::before, .bg::after {
+    content: ""; position: absolute; border-radius: 50%; filter: blur(90px);
+  }
+  .bg::before {
+    width: 90vmax; height: 90vmax; left: -30vmax; top: -45vmax;
+    background: radial-gradient(circle, rgba(51,99,255,0.32) 0%, transparent 62%);
+    animation: drift1 26s ease-in-out infinite alternate;
+  }
+  .bg::after {
+    width: 80vmax; height: 80vmax; right: -35vmax; bottom: -40vmax;
+    background: radial-gradient(circle, rgba(122,63,168,0.30) 0%, transparent 62%);
+    animation: drift2 32s ease-in-out infinite alternate;
+  }
+  @keyframes drift1 { to { transform: translate(6vmax, 4vmax) scale(1.08); } }
+  @keyframes drift2 { to { transform: translate(-5vmax, -4vmax) scale(1.05); } }
+
+  /* ---- chrome ---- */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 34px; gap: 26px; pointer-events: none;
+  }
+  .wordmark { width: 118px; height: 16px; color: var(--ink); }
+  .progress {
+    width: min(320px, 60vw); height: 2px; background: rgba(255,255,255,0.12); border-radius: 1px;
+  }
+  .progress i {
+    display: block; height: 100%; background: var(--blue); border-radius: 1px;
+    width: 0%; transition: width .45s cubic-bezier(.4,0,.2,1);
+  }
+
+  .hud {
+    position: fixed; z-index: 10; bottom: 30px; font-size: 13px; color: var(--muted);
+  }
+  .hud.left { left: 36px; }
+  .hud.right { right: 36px; letter-spacing: 0.04em; }
+  #back {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--line); border-radius: 24px; padding: 9px 18px;
+    color: var(--ink); background: transparent; font-size: 13.5px; font-family: inherit;
+    cursor: pointer; transition: border-color .15s, background .15s, opacity .3s, transform .3s;
+  }
+  #back:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
+  #back.hidden { opacity: 0; pointer-events: none; transform: translateY(6px); }
+  .enter-hint { margin-left: 14px; opacity: 0.75; }
+  .enter-hint kbd {
+    font-family: inherit; border: 1px solid var(--line); border-radius: 5px;
+    padding: 2px 7px; font-size: 11.5px; margin: 0 2px;
+  }
+
+  /* ---- stage / slides ---- */
+  main { position: fixed; inset: 0; z-index: 5; }
+  .slide {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 120px 48px 110px; gap: 0;
+    opacity: 0; transform: translateY(26px); pointer-events: none;
+    transition: opacity .4s cubic-bezier(.4,0,.2,1), transform .4s cubic-bezier(.4,0,.2,1);
+  }
+  .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+  .slide.leaving { opacity: 0; transform: translateY(-26px); }
+
+  .kicker {
+    font-size: 12.5px; letter-spacing: 0.24em; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 20px; font-weight: 500;
+  }
+  h1 {
+    font-family: "Inter Tight", "Inter", sans-serif;
+    font-size: clamp(34px, 4.6vw, 58px); font-weight: 500; letter-spacing: -0.02em;
+    line-height: 1.08; max-width: 800px;
+  }
+  .sub {
+    margin-top: 18px; font-size: 16.5px; line-height: 1.6; color: var(--muted); max-width: 560px;
+  }
+
+  /* buttons */
+  .btn {
+    font-family: inherit; font-size: 15.5px; font-weight: 500; cursor: pointer;
+    border-radius: 32px; padding: 15px 36px; transition: all .18s ease; border: 1px solid transparent;
+  }
+  .btn.primary { background: var(--blue); color: #fff; }
+  .btn.primary:hover { background: var(--blue-press); transform: translateY(-1px); }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn.ghost:hover { border-color: rgba(255,255,255,0.45); }
+
+  /* chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 44px; max-width: 640px; }
+  .chip {
+    border: 1px solid var(--line); border-radius: 32px; padding: 13px 26px;
+    font-size: 15px; color: var(--ink); background: var(--glass); cursor: pointer;
+    transition: all .16s ease;
+  }
+  .chip:hover { border-color: rgba(255,255,255,0.5); transform: translateY(-1px); }
+  .chip.sel { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  /* option cards */
+  .cards { display: flex; gap: 18px; justify-content: center; margin-top: 48px; flex-wrap: wrap; }
+  .opt {
+    width: 252px; min-height: 218px; border-radius: 18px; padding: 28px 24px 24px;
+    background: var(--glass); border: 1px solid var(--line);
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+    cursor: pointer; transition: all .18s ease; text-align: center;
+  }
+  .opt:hover { transform: translateY(-4px); border-color: rgba(102,138,255,0.65); background: rgba(51,99,255,0.09); }
+  .opt.sel { border-color: var(--blue); background: rgba(51,99,255,0.16); box-shadow: 0 0 0 1px var(--blue) inset; }
+  .opt .ico {
+    width: 58px; height: 58px; border-radius: 50%; margin-bottom: 20px;
+    background: rgba(51,99,255,0.14); display: flex; align-items: center; justify-content: center;
+  }
+  .opt .ico svg { width: 26px; height: 26px; stroke: #7C9BFF; }
+  .opt .t { font-size: 16.5px; font-weight: 500; line-height: 1.35; }
+  .opt .d { font-size: 13px; color: var(--muted); margin-top: 9px; line-height: 1.5; }
+
+  /* headset sub-select */
+  .subselect { margin-top: 34px; max-height: 0; overflow: hidden; opacity: 0; transition: all .4s ease; }
+  .subselect.open { max-height: 130px; opacity: 1; }
+  .subselect .lbl { font-size: 13px; color: var(--muted); margin-bottom: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* result */
+  .summary {
+    margin-top: 14px; font-size: 13.5px; color: var(--muted);
+  }
+  .summary a { color: #7C9BFF; text-decoration: none; }
+  .summary a:hover { text-decoration: underline; }
+  .actions { display: flex; gap: 18px; justify-content: center; margin-top: 46px; flex-wrap: wrap; }
+  .act {
+    width: 268px; border-radius: 18px; padding: 26px 24px 22px; text-align: left;
+    border: 1px solid var(--line); background: var(--glass); cursor: pointer;
+    transition: all .18s ease; position: relative;
+  }
+  .act:hover { transform: translateY(-4px); border-color: rgba(102,138,255,0.65); }
+  .act.primary { background: var(--blue); border-color: var(--blue); }
+  .act.primary:hover { background: var(--blue-press); }
+  .act .arrow { position: absolute; top: 20px; right: 20px; opacity: 0.7; font-size: 15px; }
+  .act .t { font-size: 16.5px; font-weight: 500; line-height: 1.35; padding-right: 20px; }
+  .act .d { font-size: 13px; margin-top: 8px; line-height: 1.5; color: var(--muted); }
+  .act.primary .d { color: rgba(255,255,255,0.75); }
+  .extras { display: flex; gap: 10px; justify-content: center; margin-top: 26px; flex-wrap: wrap; }
+  .extra {
+    font-size: 13px; color: var(--ink); border: 1px solid var(--line); border-radius: 20px;
+    padding: 8px 16px; background: rgba(255,255,255,0.04); cursor: pointer; transition: all .15s;
+  }
+  .extra:hover { border-color: rgba(255,255,255,0.45); }
+  .extra b { color: #7C9BFF; font-weight: 500; }
+
+  @media (max-width: 860px) {
+    .cards, .actions { flex-direction: column; align-items: center; }
+    .opt, .act { width: min(420px, 88vw); min-height: 0; }
+    .hud.left { left: 16px; } .hud.right { right: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<header>
+  <svg viewBox="0 0 121 16" class="wordmark" fill="currentColor" id="logo"></svg>
+  <div class="progress"><i id="bar"></i></div>
+</header>
+
+<main id="stage"></main>
+
+<div class="hud left">
+  <button id="back">← Back</button>
+  <span class="enter-hint" id="hint"><kbd>Enter</kbd> to continue</span>
+</div>
+<div class="hud right" id="stepnum"></div>
+
+<script>
+"use strict";
+/* ============ state ============ */
+const S = { working: null, interest: null, headset: null, model: null, dev: null };
+let step = 0;
+
+const ICONS = {
+  research: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2.5-7 4 14 3-9 1.5 2h6"/></svg>',
+  experiment: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 10.5l2-2 2.5 3L14 8l3 3.5"/></svg>',
+  bci: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a7 7 0 0 1 7 7c0 2.5-1.2 4-2.4 5.4-.8 1-1.1 2-1.1 3.6h-7c0-1.6-.3-2.6-1.1-3.6C6.2 14 5 12.5 5 10a7 7 0 0 1 7-7z"/><circle cx="9.5" cy="9.5" r="1" fill="currentColor"/><circle cx="14.5" cy="9.5" r="1" fill="currentColor"/><path d="M9.5 9.5v3h5v-3"/></svg>',
+  download: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+  headset: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h13"/><path d="M9 7h7M9 10h5"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
+  spark: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 5 13h6l-1 9 8-11h-6z"/></svg>'
+};
+
+/* ============ results config ============ */
+const RESULTS = {
+  pro: {
+    product: "EmotivPro",
+    tagline: "Research-grade EEG software for scientific workflows.",
+    actions: [
+      { icon: "download", t: "Download EmotivPro for free", d: "Full-featured trial — explore plans when you're ready.", primary: true },
+      { icon: "headset", t: "Learn about Epoc X", d: "Our 14-channel wireless EEG headset, built for research." },
+      { icon: "book", t: "Setup guides", d: "From unboxing to your first high-fidelity recording." }
+    ]
+  },
+  studio: {
+    product: "Emotiv Studio",
+    tagline: "Design, run and analyze neuro experiments — no code.",
+    actions: [
+      { icon: "play", t: "See a demo experiment", d: "A guided tour through a real stimuli-response study.", primary: true },
+      { icon: "experiment", t: "Start an audio-visual stimuli experiment", d: "Build your first flow in minutes with templates." },
+      { icon: "calendar", t: "Book a personalized demo", d: "Walk through your use case with our team." }
+    ]
+  },
+  bci: {
+    product: "EmotivBCI",
+    tagline: "Train mental commands and control the digital world.",
+    actions: [
+      { icon: "spark", t: "Try EmotivBCI", d: "Train your first mental command in one session.", primary: true },
+      { icon: "headset", t: "Explore compatible headsets", d: "Insight and Epoc X — pick your interface." },
+      { icon: "book", t: "Join the developer program", d: "Cortex API, SDKs, and community projects." }
+    ]
+  }
+};
+
+/* ============ slides ============ */
+const slides = [
+  {
+    id: "welcome",
+    render: () => `
+      <div class="kicker">Get started</div>
+      <h1>Let's find your setup.</h1>
+      <p class="sub">A few quick questions and we'll point you to the right Emotiv product. Takes about 30 seconds.</p>
+      <div style="margin-top:44px"><button class="btn primary" data-go>Start</button></div>`
+  },
+  {
+    id: "working",
+    render: () => `
+      <div class="kicker">1 — About you</div>
+      <h1>What are you working on?</h1>
+      <div class="chips">
+        ${["Academic research","Market & UX research","Personal projects & BCI","Health & wellness","Something else"]
+          .map(x => `<div class="chip ${S.working===x?"sel":""}" data-pick="working" data-v="${x}">${x}</div>`).join("")}
+      </div>`
+  },
+  {
+    id: "interest",
+    render: () => `
+      <div class="kicker">2 — Your goal</div>
+      <h1>Which of these sounds<br>most interesting right now?</h1>
+      <div class="cards">
+        <div class="opt ${S.interest==="pro"?"sel":""}" data-pick="interest" data-v="pro">
+          <div class="ico">${ICONS.research}</div>
+          <div class="t">Collect high-fidelity EEG data for research</div>
+          <div class="d">Raw EEG, performance metrics, markers and exports.</div>
+        </div>
+        <div class="opt ${S.interest==="studio"?"sel":""}" data-pick="interest" data-v="studio">
+          <div class="ico">${ICONS.experiment}</div>
+          <div class="t">Create a stimuli-response experiment</div>
+          <div class="d">Present stimuli, capture reactions, analyze results.</div>
+        </div>
+        <div class="opt ${S.interest==="bci"?"sel":""}" data-pick="interest" data-v="bci">
+          <div class="ico">${ICONS.bci}</div>
+          <div class="t">Experience a brain-computer interface</div>
+          <div class="d">Mental commands, expressions, and real-time control.</div>
+        </div>
+      </div>`
+  },
+  {
+    id: "headset",
+    render: () => `
+      <div class="kicker">3 — Your gear</div>
+      <h1>Do you own an Emotiv headset?</h1>
+      <div class="chips">
+        ${[["yes","Yes, I have one"],["ordered","It's on the way"],["no","Not yet"]]
+          .map(([v,x]) => `<div class="chip ${S.headset===v?"sel":""}" data-pick="headset" data-v="${v}">${x}</div>`).join("")}
+      </div>
+      <div class="subselect ${S.headset==="yes"?"open":""}" id="modelrow">
+        <div class="lbl">Which one?</div>
+        <div class="chips" style="margin-top:0">
+          ${["MN8","Insight","Epoc X","Flex 2"].map(x => `<div class="chip ${S.model===x?"sel":""}" data-pick="model" data-v="${x}">${x}</div>`).join("")}
+        </div>
+      </div>`
+  },
+  {
+    id: "dev",
+    render: () => `
+      <div class="kicker">4 — One more thing</div>
+      <h1>Interested in our<br>developer program?</h1>
+      <p class="sub">Cortex API, SDKs, and tools to build on brain data.</p>
+      <div class="chips">
+        ${[["yes","Yes, tell me more"],["later","Maybe later"],["no","No thanks"]]
+          .map(([v,x]) => `<div class="chip ${S.dev===v?"sel":""}" data-pick="dev" data-v="${v}">${x}</div>`).join("")}
+      </div>`
+  },
+  {
+    id: "result",
+    render: () => {
+      const r = RESULTS[S.interest || "pro"];
+      const extras = [];
+      if (S.headset === "no") extras.push(`<div class="extra">No headset yet? <b>Pair it with Epoc X →</b></div>`);
+      if (S.headset === "ordered") extras.push(`<div class="extra">While you wait: <b>set up your account →</b></div>`);
+      if (S.dev === "yes") extras.push(`<div class="extra">Developer program: <b>join the waitlist →</b></div>`);
+      return `
+      <div class="kicker">Your match</div>
+      <h1>Get started with ${r.product}</h1>
+      <p class="sub">${r.tagline}</p>
+      <div class="actions">
+        ${r.actions.map(a => `
+          <div class="act ${a.primary?"primary":""}">
+            <span class="arrow">↗</span>
+            <div class="t">${a.t}</div>
+            <div class="d">${a.d}</div>
+          </div>`).join("")}
+      </div>
+      ${extras.length ? `<div class="extras">${extras.join("")}</div>` : ""}
+      <p class="summary">Based on your answers — not quite right? <a href="#" id="restart">Start over</a></p>`;
+    }
+  }
+];
+
+/* ============ engine ============ */
+const stage = document.getElementById("stage");
+const bar = document.getElementById("bar");
+const backBtn = document.getElementById("back");
+const stepnum = document.getElementById("stepnum");
+const hint = document.getElementById("hint");
+let current = null;
+
+function show(i, dir = 1) {
+  step = i;
+  const def = slides[i];
+  const el = document.createElement("div");
+  el.className = "slide";
+  el.innerHTML = def.render();
+  stage.appendChild(el);
+  wire(el);
+  const old = current;
+  current = el;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.classList.add("active");
+    if (old) { old.classList.add("leaving"); old.classList.remove("active"); setTimeout(() => old.remove(), 450); }
+  }));
+  bar.style.width = (i / (slides.length - 1)) * 100 + "%";
+  backBtn.classList.toggle("hidden", i === 0);
+  stepnum.textContent = i > 0 && i < slides.length - 1 ? `${i} / ${slides.length - 2}` : "";
+  hint.style.display = (i === 0 || canAdvance()) ? "" : "none";
+}
+
+function canAdvance() {
+  const id = slides[step].id;
+  if (id === "welcome" || id === "result") return true;
+  if (id === "working") return !!S.working;
+  if (id === "interest") return !!S.interest;
+  if (id === "headset") return !!S.headset;
+  if (id === "dev") return !!S.dev;
+  return false;
+}
+function advance() { if (step < slides.length - 1 && canAdvance()) show(step + 1); }
+
+function wire(el) {
+  el.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", advance));
+  el.querySelectorAll("[data-pick]").forEach(c => c.addEventListener("click", () => {
+    const key = c.dataset.pick, v = c.dataset.v;
+    S[key] = v;
+    el.querySelectorAll(`[data-pick="${key}"]`).forEach(x => x.classList.toggle("sel", x.dataset.v === v));
+    if (key === "headset") {
+      const row = el.querySelector("#modelrow");
+      if (v === "yes") { row.classList.add("open"); return; }
+      row.classList.remove("open");
+    }
+    if (key === "model") { setTimeout(advance, 320); return; }
+    if (key === "headset" && S.headset !== "yes") { setTimeout(advance, 320); return; }
+    setTimeout(advance, 320);
+  }));
+  const restart = el.querySelector("#restart");
+  if (restart) restart.addEventListener("click", e => {
+    e.preventDefault();
+    Object.keys(S).forEach(k => S[k] = null);
+    show(0);
+  });
+}
+
+backBtn.addEventListener("click", () => { if (step > 0) show(step - 1); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") advance();
+  if (e.key === "ArrowLeft" || e.key === "Backspace") {
+    if (document.activeElement.tagName !== "INPUT" && step > 0) show(step - 1);
+  }
+});
+
+/* logo */
+fetch("/projects/onboarding/draft-1/logo.svg").then(r => r.text()).then(t => {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = t;
+  const svg = tmp.querySelector("svg");
+  if (svg) document.getElementById("logo").innerHTML = svg.innerHTML;
+}).catch(() => {});
+
+show(0);
+</script>
+</body>
+</html>
