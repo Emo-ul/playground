@@ -1156,10 +1156,12 @@ html body { background: rgb(255, 255, 255); }
       p.style.color = "rgb(255,255,255)";
       p.style.setProperty("--framer-text-color", "rgb(255,255,255)");
     });
-    b.addEventListener("click", function (e) {
+    /* the clone's 'click' is swallowed by the page's global anchor interceptor
+       (document-capture + stopImmediatePropagation), so navigate on pointerup */
+    b.addEventListener("pointerup", function (e) {
       e.preventDefault(); e.stopPropagation();
       window.location.href = "/projects/hero/cta/onboarding/";
-    }, true);
+    });
     b.style.cursor = "pointer";
     var wrap = document.createElement("span");
     wrap.style.display = "inline-flex";

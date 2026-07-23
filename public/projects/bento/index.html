@@ -136,211 +136,133 @@ const PX=(id,w=940,h=560)=>`https://images.pexels.com/photos/${id}/pexels-photo-
 const G={
  'mental-command':{
    title:'Train your first Mental Command',
-   intro:'The atom of every Emotiv build: teach the system one repeatable thought, then wire it to anything — a drone, a game, a light.',
-   flow:[
-     ['🎧','Fit headset','All sensors green in Contact Quality'],
-     ['✦','EmotivBCI → Mental Commands','Open the training panel'],
-     ['◯','Train NEUTRAL','8 s relaxed, thinking of nothing'],
-     ['➤','Train an action','e.g. "Push" — 8 s, same vivid thought'],
-     ['🧊','Test on the 3D cube','Retrain weak actions, repeat 4–8×'],
-     ['🔌','Use it anywhere','Subscribe to the com stream via Cortex']
-   ],
+   intro:'Every build on this screen stands on one skill: teaching Emotiv to recognise a single repeatable thought. Master it once — it takes an afternoon — and drones, games and apps become interchangeable endpoints.',
+   flow:[['🎧','Headset on','Every contact dot green'],['✦','EmotivBCI','Mental Commands panel'],['◯','Neutral baseline','8 s of nothing in particular'],['➤','Train an action','One vivid thought, repeated'],['🧊','Cube test','Retrain what wobbles'],['⌘','Cortex com stream','Your thought, as an event']],
    need:['Any Emotiv headset (Insight, EPOC X, FLEX)','EMOTIV Launcher + EmotivBCI (or Studio)'],
-   steps:['Fit the headset and confirm every sensor is green','Open EmotivBCI and select Mental Commands','Record <b>Neutral</b> first — 8 seconds, relaxed','Add an action like <b>Push</b> and train it 8 seconds, imagining the exact same thing each time','Repeat 4–8 rounds; watch the skill-rating bars climb','Test on the floating 3D cube; retrain any weak command','To control other apps, subscribe to the <code>com</code> stream through the Cortex API'],
-   tips:['Use the <i>same</i> thought every repetition — a vivid mental image works best','Anchor it to something physical (imagine pushing a real box)','One strong command beats four shaky ones','Short sessions; stop while accuracy is still rising'],
+   steps:['Fit the headset and wait for every contact dot to turn green — signal quality decides how fast training converges','Record <b>Neutral</b> first: 8 seconds of doing nothing in particular. This is the reference everything is compared against','Add one action — <b>Push</b> — and train it with one vivid, physical thought (imagine shoving a heavy door). Same image, every repetition','Alternate short training rounds with cube tests; 4–8 rounds is typical before the cube obeys on demand','Only then add a second command — two strong commands beat five mushy ones','Graduate: subscribe to the <code>com</code> stream via Cortex. From here your thought is just an event any script can listen for'],
+   tips:['If accuracy plateaus, wipe the training data and start clean — bad repetitions poison the model','Stop while you\'re ahead: a tired brain trains a tired model'],
    docs:[['📘','EmotivBCI manual','Mental command training','https://emotiv.gitbook.io/emotivbci/'],['🧠','Mental Commands — knowledge base','How the algorithm works','https://www.emotiv.com/knowledge-base/mental-commands'],['⌘','Cortex API — Advanced BCI','com stream + training API','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['▶','Emotiv Academy','Video walkthroughs','https://www.youtube.com/@EmotivAcademy']],
    video:'hK5fTYd9gZM'
  },
  'cortex':{
    title:'Build anything with the Cortex API',
-   intro:'Cortex is the WebSocket brain behind every integration on this screen. Learn the handshake once and you can pipe brain data into any app or device.',
-   flow:[
-     ['1','Register your app','account.emotiv.com → client id + secret'],
-     ['2','Connect','WebSocket to wss://localhost:6868'],
-     ['3','requestAccess','Approve the app once in the Launcher'],
-     ['4','authorize','Returns a Cortex token'],
-     ['5','createSession','Bind to your headset → session id'],
-     ['6','subscribe','eeg · pow · met · com · fac'],
-     ['7','Act on the JSON','Map streams to your outputs']
-   ],
+   intro:'Cortex is the local WebSocket service every Emotiv integration talks to. Learn one handshake — authorize, session, subscribe — and any stream of your brain data arrives in your code as JSON.',
+   flow:[['🔑','Register app','client id + secret'],['🔌','Connect','wss://localhost:6868'],['🤝','authorize','Approve once in Launcher'],['🎧','createSession','Bind your headset'],['📡','subscribe','pow · met · com · fac · eeg'],['{ }','JSON out','Route it anywhere']],
    need:['An EMOTIV account','A registered Cortex app (client id + secret)','EMOTIV Launcher running with a headset','Node.js or Python'],
-   steps:['Register a Cortex app at <b>account.emotiv.com → Cortex Apps</b>; copy the client id + secret','Install a WebSocket client (<code>ws</code> for Node, <code>websocket-client</code> for Python). Cortex listens at <code>wss://localhost:6868</code>','Call <code>requestAccess</code> and approve your app once in the Launcher','Call <code>authorize</code> to get a Cortex token','Call <code>createSession</code> with your headset to get a session id','<code>subscribe</code> to the streams you need: <code>pow</code> (band power), <code>met</code> (metrics), <code>com</code> (mental commands), <code>fac</code> (expressions), <code>eeg</code> (raw)','Cortex pushes JSON arrays — map them to whatever you are controlling'],
-   tips:['Clone an official <b>cortex-example</b> repo as scaffolding','Metrics and commands are licence-free; raw EEG needs a licence','Keep the Launcher open — Cortex runs locally beside the headset'],
+   steps:['Register a Cortex app at <b>account.emotiv.com</b> — the client id + secret identify your build','Open a WebSocket to <code>wss://localhost:6868</code>; Cortex runs beside the Launcher, on the machine wearing the headset','Walk the handshake once: <code>requestAccess</code> (approve in Launcher) → <code>authorize</code> → <code>createSession</code>','Subscribe only to what the project needs: <code>met</code> for cognitive metrics, <code>com</code> for trained commands, <code>fac</code> for expressions, <code>pow</code> for band power, <code>eeg</code> for raw signal','Treat every incoming JSON array as an event and route it — a keypress, a MIDI note, an HTTP call, a database row','Keep <b>Emotiv/cortex-example</b> open beside you; each pattern above already exists there in Node, Python and Unity'],
+   tips:['Metrics and commands need no licence; raw EEG does','The Launcher must stay running — Cortex lives locally, not in the cloud'],
    docs:[['⌘','Cortex API documentation','Full reference','https://emotiv.gitbook.io/cortex-api/'],['🔑','Authentication','requestAccess → authorize','https://emotiv.gitbook.io/cortex-api/authentication'],['📡','Data subscription','pow · met · com · fac · eeg','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🐙','Emotiv on GitHub','cortex-example (Node/Python/Unity)','https://github.com/Emotiv/cortex-example'],['🛠','Developer portal','Register + docs hub','https://www.emotiv.com/developer']]
  },
  'game-controller':{
    title:'Turn your thoughts into game controls',
-   intro:'Perrikaryal beat Elden Ring this way. Map trained Mental Commands and facial expressions to the keystrokes your game already understands.',
-   flow:[
-     ['✦','Train commands','EmotivBCI: Push, Pull, + a facial expression'],
-     ['📡','Stream','Cortex com + fac streams'],
-     ['⌨','Map → keys','Script: command over threshold → key press'],
-     ['🎮','Game responds','Attack, dodge, heal']
-   ],
+   intro:'Perrikaryal cleared Elden Ring with trained commands mapped to attacks. The Emotiv translation: EmotivBCI supplies the events, a tiny key-emulation script supplies the game — the game itself never knows.',
+   flow:[['✦','Train','2–4 commands + 1 expression'],['⌘','Cortex','com + fac events'],['⌨','Bridge script','Event → keystroke'],['🎮','Game','Reads keys, plays normally']],
    need:['EPOC X or Insight','EmotivBCI','Python + a key-emulation lib (pynput / keyboard)','A game that reads the keyboard'],
-   steps:['Train 2–4 Mental Commands (e.g. Push = attack, Pull = dodge) plus a facial expression (clench = heal)','Subscribe to <code>com</code> and <code>fac</code> via Cortex','In your script, when a command\'s power passes a threshold, send the mapped key with <code>pynput</code>','Add debouncing so one thought triggers exactly one press','Start on a slow or turn-based game; raise complexity as your accuracy grows'],
-   tips:['Facial expressions (smile, clench) are fast and reliable for time-critical moves','Combine with head-tilt or a gamepad for hybrid control','Keep sessions short so your signal stays consistent'],
+   steps:['Choose your verbs: deliberate actions to Mental Commands (Push = attack, Pull = dodge), the time-critical one to a facial expression (clench = heal)','Train in EmotivBCI until the cube obeys every command on demand — the game will be harsher than the cube','Write the bridge: subscribe to <code>com</code> + <code>fac</code>; when an event\'s power crosses your threshold, emit the mapped key with <code>pynput</code>','Debounce: one thought = one press. A half-second cooldown prevents accidental button-mashing','Tune thresholds on a pausable or turn-based game first, then climb the difficulty ladder'],
+   tips:['Expressions fire in ~100 ms — keep them for reflexes','Hybrid control (thoughts + a regular gamepad) is how long sessions survive'],
    docs:[['⌘','Cortex — Advanced BCI','com + fac in code','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['📘','EmotivBCI manual','Training profiles','https://emotiv.gitbook.io/emotivbci/'],['🐙','cortex-example','Working code samples','https://github.com/Emotiv/cortex-example'],['▶','Emotiv Academy','BCI build videos','https://www.youtube.com/@EmotivAcademy']]
  },
  'visualise':{
    title:'Turn your brainwaves into live visuals',
-   intro:'Brainstorms and Mood Roads did this at scale. Stream band power and drive colours, shapes and shaders in real time.',
-   flow:[
-     ['🎧','Headset','Any Emotiv device'],
-     ['📡','pow stream','Theta · alpha · beta · gamma per sensor'],
-     ['🎚','Map bands → params','alpha→calm blues, beta→hot reds'],
-     ['🖼','Render','BrainViz (no-code) or p5.js / TouchDesigner / Unity']
-   ],
+   intro:'Brainstorms projected audience brains onto domes; Mood Roads turned a drive into generative art. On Emotiv the whole pipeline is one stream and one mapping: band power in, pixels out.',
+   flow:[['🎧','Headset','Live EEG'],['📡','Cortex pow','Bands per sensor, ~2×/sec'],['🎚','Normalise','Rolling 0–1 per band'],['🎨','Map','Colour · size · motion'],['🖥','Render','p5.js / TouchDesigner']],
    need:['Any headset','Cortex app (or BrainViz for the no-code route)','A visual runtime — p5.js in the browser is easiest'],
-   steps:['No-code path: open <b>EMOTIV BrainViz</b> and see your brain rendered instantly','Custom path: subscribe to the <code>pow</code> stream','Normalise each band 0–1, then map it to a visual parameter (colour, size, motion)','Feed the values into a p5.js draw loop, or send OSC into TouchDesigner','Record the session and sync it to music for a Brainstorms-style piece'],
-   tips:['Smooth the signal with a moving average so visuals glide instead of flicker','Start by driving one parameter well before adding more'],
+   steps:['Zero-code proof first: open <b>BrainViz</b> and watch your bands render live — it calibrates your intuition for the data','For your own visuals, subscribe to <code>pow</code>: theta through gamma, per sensor, several times a second','Normalise each band against its own rolling min/max — absolute values drift, ratios stay expressive','Make the artistic decision explicit: alpha → colour temperature, beta → particle speed, theta → bloom','Render in a p5.js draw loop, or send OSC into TouchDesigner when you want projection-grade output','Record screen and session together — replaying a strong emotional moment is the demo that sells the piece'],
+   tips:['Smooth every mapped value; raw bands flicker','Design for the eyes-closed alpha surge — it\'s the most theatrical effect you get for free'],
    docs:[['🖼','EMOTIV BrainViz','No-code brain visuals','https://www.emotiv.com/emotiv-brainviz'],['📡','Cortex — Data subscription','pow band power','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🔗','Lab Streaming Layer','Sync to other tools','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl'],['▶','Emotiv Academy','Creative build videos','https://www.youtube.com/@EmotivAcademy']]
  },
  'music':{
    title:'Make music with your mind',
-   intro:'AngieC played TONTO; MindTunes wrote a whole track this way. Convert brain metrics into MIDI and drive any synth or DAW.',
-   flow:[
-     ['🎧','Headset','Any Emotiv device'],
-     ['📡','met / pow','Engagement, relaxation, band power'],
-     ['🎹','Map → MIDI','Metric → MIDI CC or note (mido)'],
-     ['🔊','DAW / synth','Virtual MIDI port → your instrument']
-   ],
+   intro:'AngieC played the legendary TONTO synthesizer from her EEG; the MindTunes crew wrote a whole track this way. On Emotiv it\'s metrics-to-MIDI: your mental state becomes a control voltage.',
+   flow:[['🎧','Headset','met / pow streams'],['🔌','Bridge','mido, a few lines'],['🎛','Virtual MIDI port','IAC / loopMIDI'],['🎹','DAW','CC → any parameter']],
    need:['Any headset','Cortex app','A virtual MIDI port (loopMIDI on Windows, IAC on macOS)','Python <code>mido</code> + a DAW or synth'],
-   steps:['Create a virtual MIDI port (loopMIDI / IAC Driver)','Subscribe to <code>met</code> (engagement, relaxation) or <code>pow</code> (bands)','Map a value to a MIDI CC with <code>mido</code> — e.g. relaxation → filter cutoff','Route that MIDI port into your DAW and assign the CC to a synth parameter','Perform: shift your mental state and hear the sound move'],
-   tips:['Smooth the stream so the music isn\'t jittery','Begin with a single expressive parameter, then layer more'],
+   steps:['Create a virtual MIDI port (IAC on macOS, loopMIDI on Windows) — to the DAW, your brain is just another controller','Subscribe to <code>met</code>: engagement and relaxation move slowly and musically, ideal for performance control','Map metric → MIDI CC with <code>mido</code>, smoothed with a moving average so the sound breathes instead of jitters','Assign the CC in your DAW: relaxation → filter cutoff, engagement → reverb size','Then perform it: close your eyes, drop your shoulders, and hear the mix follow your state'],
+   tips:['Map one parameter beautifully before adding a second','Slow metrics make music; raw bands make noise'],
    docs:[['📡','Cortex — Data subscription','met + pow streams','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🎹','mido (Python MIDI)','Send MIDI from code','https://mido.readthedocs.io/'],['🔗','Lab Streaming Layer','Tight audio sync','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl'],['▶','Emotiv Academy','Music BCI videos','https://www.youtube.com/@EmotivAcademy']]
  },
  'attention':{
    title:'Measure focus & attention in real time',
-   intro:'The attention-powered car slowed when its driver drifted. Read the same Attention metric and react to it however you like.',
-   flow:[
-     ['🎧','Headset','Any Emotiv device'],
-     ['📡','met stream','Attention · engagement · stress · relaxation'],
-     ['📈','Threshold','Below X = distracted'],
-     ['🔔','React','Alert, log, or slow a device']
-   ],
+   intro:'The attention-powered car braked when its driver drifted. Strip away the car and you have the most reusable pattern on this screen: read the Attention metric, set a personal threshold, react.',
+   flow:[['🎧','Headset','met stream'],['📈','Attention 0–1','Several readings/sec'],['⚖','Threshold','Calibrated on you'],['⚡','Reaction','Alert · log · device']],
    need:['Any headset','Cortex app (the met stream is licence-free)'],
-   steps:['Subscribe to <code>met</code> and read the attention value','Log it across a work session and chart your focus curve','Set a personal threshold; when attention drops below it, fire an alert (sound, notification, or slow a device)','Compare focus vs rest blocks to calibrate the threshold to you'],
-   tips:['Everyone\'s baseline differs — calibrate before trusting a number','Pair with the Focus vs Rest experiment to validate it'],
+   steps:['Subscribe to <code>met</code> and log attention through one normal work hour — that log is your personal baseline','Find your two numbers: deep-work median and distracted median. Your threshold lives between them, not in someone else\'s paper','Wire a reaction: a notification when you drift, a paused video, a dimmed smart bulb — anything with an API','Chart a full day; the shape (morning peak, post-lunch dip) is usually visible immediately','Optional hardware ending, like the car: throttle a device with attention as the dead-man\'s switch'],
+   tips:['React to trends (30 s windows), not single readings','Recalibrate thresholds weekly — your baseline moves'],
    docs:[['📡','Cortex — Data subscription','met (Performance Metrics)','https://emotiv.gitbook.io/cortex-api/data-subscription'],['📊','EmotivPRO','Metrics + recording','https://www.emotiv.com/emotivpro'],['🛠','Developer portal','APIs + SDKs','https://www.emotiv.com/developer']]
  },
  'record-research':{
    title:'Record & export research-grade data',
-   intro:'The 22,000+ papers all start here: clean, time-marked EEG you can take to any analysis stack.',
-   flow:[
-     ['🎧','Headset','EPOC X / FLEX recommended'],
-     ['⦿','Record + mark','EmotivPRO: markers at each stimulus'],
-     ['⤓','Export','EDF or CSV'],
-     ['🧪','Analyse','EEGLAB · MATLAB · MNE-Python']
-   ],
+   intro:'Behind 22,000+ scholarly works sits one unglamorous pipeline: clean recordings, precise event markers, standard exports. This is that pipeline, on EmotivPRO.',
+   flow:[['🎧','Headset','Green before, during, after'],['⏺','EmotivPRO','Record + event markers'],['🧷','PsychoPy · LSL','ms-accurate stimuli'],['📤','Export','EDF / CSV'],['🔬','Analyse','MNE · EEGLAB · MATLAB']],
    need:['EPOC X or FLEX for broad coverage','EmotivPRO subscription (raw EEG export)','Optional: PsychoPy for precise stimulus timing'],
-   steps:['Record in EmotivPRO and drop an event marker at every stimulus','For millisecond timing, send markers from PsychoPy over LSL','Export the session as EDF or CSV','Load it into EEGLAB / MATLAB or MNE-Python for ERP and spectral analysis','Re-reference and epoch around your markers to build ERPs'],
-   tips:['Mastoid referencing is standard for ERP work','Aim for 100+ trials per condition for clean averages'],
+   steps:['Record in EmotivPRO with contact quality green before, during and after the session — reviewers look','Mark everything: an event marker at every stimulus onset is the difference between data and anecdote','For millisecond-critical designs, drive stimuli from PsychoPy and pipe markers in over LSL','Export EDF (universal) or CSV (quick to inspect); the file opens identically in MNE-Python, EEGLAB or MATLAB','Epoch around your markers and average — those are ERPs, the same figures the papers publish'],
+   tips:['Record 2 minutes of eyes-open / eyes-closed baseline every session','Name files like you\'ll need them in two years — because you will'],
    docs:[['📊','EmotivPRO manual','Record + export','https://emotiv.gitbook.io/emotivpro-v3/'],['🔗','Lab Streaming Layer','PsychoPy + LSL','https://www.emotiv.com/blog/emotiv-lab-streaming-layer-lsl'],['📈','ERP tutorial','Marking a brain response','https://www.emotiv.com/blog/basics-of-event-related-potentials']]
  },
  'setup':{
    title:'Set up your headset in 5 minutes',
-   intro:'Everything on this screen begins the same way — a headset on your head and green dots on your screen.',
-   flow:[
-     ['🔋','Charge','USB; a full charge = several sessions'],
-     ['💧','Prep sensors','Moisten Insight tips / saline-soak EPOC pads'],
-     ['🔗','Pair','Bluetooth in the EMOTIV Launcher'],
-     ['🟢','Green contacts','Adjust until every sensor is green'],
-     ['〰','Live Brainwaves','Watch your mind stream in']
-   ],
+   intro:'Every story on this screen starts identically: sensors touching scalp, dots turning green. Five minutes, once — then the rest of the catalogue opens.',
+   flow:[['🔋','Charge','USB, covers several sessions'],['💧','Prep sensors','Saline felts / damp polymer'],['📶','Pair','Launcher · Bluetooth'],['🟢','Contact quality','Everything green'],['🌊','Live Brainwaves','You, streaming']],
    need:['Your Emotiv headset + charging cable','EMOTIV Launcher installed'],
-   steps:['Charge over USB — a full charge runs multiple sessions','Prep the sensors: moisten Insight\'s polymer tips, or saline-soak EPOC X felt pads','Open the Launcher and pair over Bluetooth — your headset appears by name','Seat the headset until every sensor shows green contact quality','Open Live Brainwaves and watch your EEG stream in real time'],
-   tips:['Part your hair under each sensor for better contact','A little more saline fixes most weak sensors'],
+   steps:['Charge over USB — one charge covers multiple sessions','Prep the contact points: saline for EPOC X felt pads, a moment of moisture for Insight\'s polymer tips','Open the Launcher and pair over Bluetooth; the headset appears by name','Adjust until every sensor reads green in Contact Quality — the front pair is usually the stubborn one','Open Live Brainwaves. Blink, clench, close your eyes and watch alpha bloom — you\'re live'],
+   tips:['Hair parting beats pressure: move hair, don\'t push harder','Re-wet sensors mid-session if quality sags'],
    docs:[['🚀','Quick-start guide','Full setup walkthrough','https://www.emotiv.com/setup'],['🧩','EMOTIV Launcher','Pairing + updates','https://www.emotiv.com/emotiv-launcher']]
  },
  'which-headset':{
    title:'Which headset is right for you?',
-   intro:'Four headsets, one Studio. They differ in channels (how much of the brain you see) and fit (how long you\'ll happily wear them).',
-   flow:[
-     ['?','What\'s your goal?','Pick the branch below'],
-     ['●','Everyday / first BCI','→ Insight (5 ch, on in seconds)'],
-     ['●','Serious BCI on a budget','→ EPOC X (14 ch, the icon)'],
-     ['●','Publication research','→ FLEX (32 ch, full coverage)'],
-     ['●','All-day wellness','→ MN8 (EEG earbuds)']
-   ],
+   intro:'Four headsets, one platform. The decision is really two questions: how much of the brain do you need to see, and how long will you be wearing it?',
+   flow:[['🪶','Insight','5 ch · on in seconds'],['🧠','EPOC X','14 ch · the classic'],['🔬','FLEX','32 ch · full scalp'],['🎧','MN8','Earbuds · all day']],
    need:['Just your use-case — this one\'s a decision guide'],
-   steps:['<b>Insight</b> — 5 channels, on in seconds. Everyday BCI, focus tracking, first projects','<b>EPOC X</b> — 14 channels, the classic. Serious BCI and research on a budget; most stories here used one','<b>FLEX</b> — 32 channels, full-scalp coverage. Publication-grade research','<b>MN8</b> — EEG in earbuds. All-day focus and stress, looks like normal headphones','Already own one? You\'re holding the right one — the best headset is the one on your head'],
-   tips:['More channels = more brain coverage, but longer setup','Insight and MN8 are the fastest to live data'],
+   steps:['<b>Insight</b> — 5 channels, on in seconds. First BCIs, focus tracking, everyday projects','<b>EPOC X</b> — 14 channels, the workhorse behind most stories here. Research-credible and BCI-ready','<b>FLEX</b> — up to 32 channels of full-scalp coverage, for when the protocol is in charge','<b>MN8</b> — EEG inside earbuds, part of the Brainwear experience. Focus and stress through a normal workday','Rule of thumb: commands and metrics run on all of them; publication-grade ERPs want EPOC X or FLEX'],
+   tips:['Already own one? Then it\'s the right one — start there','Buy for the project after this one, not just this one'],
    docs:[['⚖','Compare all hardware','Side-by-side specs','https://www.emotiv.com/comparison'],['🛒','Headsets overview','Insight · EPOC X · FLEX · MN8','https://www.emotiv.com/']]
  },
  /* ---------- NEW INTEGRATIONS ---------- */
  'dji-drone':{
    title:'Fly a DJI Tello with your mind',
-   intro:'We built this at Emotiv Academy. Train a Mental Command, bridge it through Cortex, and send flight commands to a DJI Tello over Wi-Fi.',
-   flow:[
-     ['✦','Train "Push"','EmotivBCI — add Lift/Left/Right later'],
-     ['📡','Cortex com','Python reads the command stream'],
-     ['🔀','Map → SDK','command → djitellopy call'],
-     ['🚁','Tello flies','UDP over the drone\'s Wi-Fi']
-   ],
+   intro:'Emotiv Academy\'s classic: one trained thought, one Wi-Fi drone. The full chain — thought → classifier → WebSocket → Python → rotors — fits in an afternoon.',
+   flow:[['✦','Train Push','EmotivBCI, cube first'],['⌘','Cortex','com events over WebSocket'],['🐍','Python bridge','djitellopy'],['🚁','Tello','Responds over Wi-Fi']],
    need:['DJI Tello or Tello EDU','Insight or EPOC X','EmotivBCI + a trained profile','Python + <code>djitellopy</code>','Your Cortex client id + secret'],
-   steps:['Train at least <b>Push</b> (forward); add Lift / Drop / Left / Right as accuracy improves','<code>pip install djitellopy</code> and connect your computer to the Tello\'s Wi-Fi','In Python: <code>from djitellopy import Tello; t=Tello(); t.connect(); t.takeoff()</code>','Open a Cortex WebSocket: authorize → createSession → subscribe <code>com</code>','When command is "push" and power &gt; 0.3, call <code>t.move_forward(30)</code>','Map more commands, and bind an emergency <code>t.land()</code> to a keypress'],
-   tips:['Fly in a large open space with a hand ready to land','Hover first; add movement once control is steady','A low battery makes the Tello drift — keep it charged'],
+   steps:['Train <b>Push</b> until the cube moves on demand — the drone inherits exactly that reliability, no more','Prove drone control the boring way first: connect to the Tello\'s Wi-Fi and script <code>takeoff()</code> / <code>land()</code> with <code>djitellopy</code>','Open the Cortex socket, subscribe to <code>com</code>, and just print events while thinking Push — watch the power values scroll','Join the halves: Push above threshold → <code>move_forward()</code>; anything else → hover','Add verbs one at a time (Lift, Drop, rotate) — every new command taxes accuracy, so earn each one','Fly indoors over something soft with a half-charged battery: failures stay gentle while you tune'],
+   tips:['Hover is a feature: default to it whenever confidence dips','Log every command event — misfires are your tuning data'],
    docs:[['🐙','DJITelloPy','Python Tello SDK wrapper','https://github.com/damiafuentes/DJITelloPy'],['⌘','Cortex — Advanced BCI','com stream in code','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['✦','EmotivBCI manual','Train the command','https://emotiv.gitbook.io/emotivbci/'],['▶','Emotiv Academy','Our drone build','https://www.youtube.com/@EmotivAcademy']],
    note:'Fly responsibly: open space, clear of people, and always keep a manual land ready.'
  },
  'spotify':{
    title:'Control Spotify with your brain',
-   intro:'Skip, pause and play without lifting a finger — an Emotiv Academy favourite. Map Mental Commands or facial expressions to the Spotify Web API.',
-   flow:[
-     ['✦','Train','Commands or expressions (clench, smile)'],
-     ['📡','Cortex com/fac','Read the stream in Python'],
-     ['🎵','Spotify Web API','next / previous / play / pause'],
-     ['🔊','Playback changes','On your active device']
-   ],
+   intro:'The desk favourite: skip a track by thinking, pause with a jaw clench. Emotiv events on one side, Spotify\'s Web API on the other, thirty lines of Python between them.',
+   flow:[['✦','Train','Commands + expressions'],['⌘','Cortex','com · fac events'],['🌐','Spotify Web API','spotipy'],['🔊','Playback','Skips, pauses, plays']],
    need:['Spotify <b>Premium</b> (playback control needs it)','A Spotify developer app (client id + secret)','Insight or EPOC X','Python <code>spotipy</code>','Your Cortex app'],
-   steps:['Create an app at <b>developer.spotify.com</b>; note the client id/secret and set a redirect URI','<code>pip install spotipy</code> and authorise with scope <code>user-modify-playback-state</code>','Train commands (Push = next, Pull = previous) or use facial expressions (clench = play/pause)','Subscribe to <code>com</code> / <code>fac</code> via Cortex','Map events: on "push" call <code>sp.next_track()</code>; on clench toggle <code>sp.pause()</code> / <code>sp.start_playback()</code>','Add a cooldown so one thought equals one skip'],
-   tips:['Facial expressions are more reliable than commands for instant control','Keep your phone as a fallback while you tune thresholds'],
+   steps:['Register an app at <b>developer.spotify.com</b> and authorise <code>spotipy</code> with the playback-control scope','Split the mapping by speed: reflexes to expressions (clench = play/pause), deliberate choices to commands (Push = next track)','Subscribe to <code>com</code> + <code>fac</code>; on threshold, call <code>sp.next_track()</code> or <code>sp.pause_playback()</code>','Add a cooldown so one enthusiastic thought doesn\'t skip half the album','Leave it running through a workday — this is the build that quietly becomes a habit'],
+   tips:['Volume nudges make a great second command pair','Spotify must be playing on some device for the API to act on it'],
    docs:[['🎵','Spotify Web API','Playback endpoints','https://developer.spotify.com/documentation/web-api'],['🐍','spotipy','Python Spotify client','https://spotipy.readthedocs.io/'],['📡','Cortex — Data subscription','com + fac','https://emotiv.gitbook.io/cortex-api/data-subscription'],['▶','Emotiv Academy','Our Spotify build','https://www.youtube.com/@EmotivAcademy']]
  },
  'claude-desktop':{
    title:'Wire your brain into Claude Desktop (MCP)',
-   intro:'Claude Desktop speaks MCP — the Model Context Protocol. Expose your live brain state as an MCP tool and Claude can read your focus, stress or commands. No API keys, all local.',
-   flow:[
-     ['📡','Cortex met/com','Your live brain state'],
-     ['🧩','Local MCP server','Node/Python exposes get_brain_state'],
-     ['🖥','Claude Desktop','Connects to your MCP server'],
-     ['💬','Ask Claude','"How\'s my focus?" → it calls your tool']
-   ],
+   intro:'Claude Desktop speaks MCP — the Model Context Protocol. Serve your live brain state as a tool and the model can factor your actual focus into its answers.',
+   flow:[['⌘','Cortex','met · com streams'],['🛠','MCP server','exposes get_brain_state'],['🤖','Claude Desktop','Calls your tool mid-chat']],
    need:['Claude Desktop app','An Emotiv headset + Cortex app','Node.js or Python','The MCP SDK (@modelcontextprotocol)'],
-   steps:['Build a small MCP server with the official SDK, exposing a tool like <code>get_brain_state</code>','Inside that tool, open a Cortex WebSocket and return the latest <code>met</code> (attention, stress, relaxation) or <code>com</code>','Register the server in Claude Desktop\'s <code>claude_desktop_config.json</code>','Restart Claude Desktop — your tool now appears','Ask "Am I focused right now?" and Claude calls the tool and reasons over your live brain data','Go further: have Claude log focus across a work session and suggest breaks'],
-   tips:['Keep the server local and return smoothed values','MCP is the clean, structured route — no brittle keystroke hacks','This uses Anthropic\'s consumer app, not the API'],
+   steps:['Scaffold an MCP server with the official SDK and expose a single tool: <code>get_brain_state</code>','Inside the tool, return the latest <code>met</code> snapshot from Cortex — attention, stress, relaxation as plain numbers','Register the server in <code>claude_desktop_config.json</code> and restart Claude Desktop; the tool appears automatically','Ask: “How focused am I right now?” — Claude calls your tool and answers from your EEG, not vibes','Extend it: let Claude suggest deep work when attention trends high, or shorten its answers when stress spikes'],
+   tips:['Return trends (last 5 min), not instant values — they\'re what the model can reason about','One well-named tool beats five vague ones'],
    docs:[['🔌','Model Context Protocol','Build an MCP server','https://modelcontextprotocol.io/'],['🖥','Claude Desktop + MCP','Connect local servers','https://modelcontextprotocol.io/quickstart/user'],['📡','Cortex — Data subscription','met + com','https://emotiv.gitbook.io/cortex-api/data-subscription'],['🛠','Emotiv developer','Cortex hub','https://www.emotiv.com/developer']],
    note:'Non-API integration: Claude Desktop reads a local tool you own — your brain data never leaves your machine.'
  },
  'chatgpt':{
    title:'Drive ChatGPT hands-free with your mind',
-   intro:'A different route, no API. Use Mental Commands and facial expressions as an input bridge that types into — and dictates to — the ChatGPT desktop app.',
-   flow:[
-     ['✦','Train','Commands + an expression (clench)'],
-     ['📡','Cortex com/fac','Read the stream'],
-     ['⌨','OS bridge','Map → keystrokes / trigger dictation'],
-     ['💬','ChatGPT app','Receives input hands-free']
-   ],
+   intro:'No API required: treat ChatGPT\'s desktop app like any other program and feed it OS-level input — your voice for the words, your thoughts for the buttons.',
+   flow:[['✦','Train','Commands + expressions'],['⌘','Cortex','com · fac events'],['⌨','OS bridge','Keystrokes + dictation'],['💬','ChatGPT','Hands-free, end to end']],
    need:['ChatGPT desktop app','Emotiv headset + Cortex','Python','An OS-automation lib (pynput, AppleScript, or AutoHotkey)'],
-   steps:['Train commands (Push = send, Pull = new line) and an expression (clench = activate voice)','Subscribe to <code>com</code> / <code>fac</code> via Cortex','Your bridge maps events: clench → trigger ChatGPT\'s voice/dictation; push → press Enter to send','Use blinks or expressions to accept or regenerate a response','Combine with OS dictation — speak the prompt, "send" it with a thought'],
-   tips:['Expressions beat commands for crisp discrete actions','This keyboard/voice-bridge pattern works with <i>any</i> app that has no EEG API','Contrast with the Claude build, which uses structured MCP tools'],
+   steps:['Split the work: dictation carries the prompt text, Emotiv events carry the controls — send, new line, regenerate','Train <b>Push</b> = send; reserve a clench for toggling the microphone','The bridge is one script: subscribe to <code>com</code> / <code>fac</code>, emit Enter or the dictation hotkey with <code>pynput</code>','Debounce and log every trigger; each misfire tells you which threshold to move','The pattern generalises: the same keyboard bridge drives editors, browsers, slide decks — anything without an EEG API'],
+   tips:['Voice for content, brain for control — don\'t make thoughts spell','Test the bridge in a text editor before pointing it at anything that sends'],
    docs:[['⌘','Cortex — Advanced BCI','com + fac','https://emotiv.gitbook.io/cortex-api/advanced-bci'],['⌨','pynput','Emulate keys from Python','https://pynput.readthedocs.io/'],['🔁','AutoHotkey','Windows automation','https://www.autohotkey.com/'],['▶','Emotiv Academy','BCI bridges','https://www.youtube.com/@EmotivAcademy']],
    note:'Non-API integration: a thought/expression bridge that works with the consumer ChatGPT app via OS input.'
  },
  'replit':{
    title:'Build your BCI app on Replit',
-   intro:'No local project setup — prototype and host your Cortex integration in the browser on Replit, and let Replit Agent scaffold the boilerplate.',
-   flow:[
-     ['➕','New Repl','Python or Node'],
-     ['🔐','Secrets','client id + secret in the Secrets pane'],
-     ['⌘','Cortex client','WebSocket to local Cortex / Emotiv Cloud'],
-     ['🤖','Replit Agent','Scaffolds authorize→session→subscribe'],
-     ['🚀','Deploy','Share a live URL']
-   ],
+   intro:'Zero local setup: prototype the whole Cortex integration in a browser repl, let Replit Agent write the boilerplate, and deploy a shareable brain dashboard the same day.',
+   flow:[['🌐','New repl','Python or Node'],['🔐','Replit Secrets','client id + secret'],['⌘','Cortex','wss beside the headset'],['🤖','Replit Agent','Scaffolds the handshake'],['🚀','Deploy','A URL you can share']],
    need:['A Replit account','Your Cortex client id + secret','An Emotiv headset (Cortex runs locally with the headset)'],
-   steps:['Create a repl (Python or Node)','Store your client id/secret in <b>Replit Secrets</b> — never in code','Add a WebSocket client to talk to Cortex at <code>wss://localhost:6868</code> (Cortex runs on the machine with the headset)','Ask <b>Replit Agent</b> to scaffold the authorize → createSession → subscribe flow','Build your feature — chart metrics, fire webhooks, log focus — then Deploy for a shareable URL'],
-   tips:['Cortex runs locally, so pair Replit (app + logic) with a small local bridge, or stream via Emotiv Cloud for remote data','Keep every credential in the Secrets pane, out of your source'],
+   steps:['Spin up a repl and stash the Cortex client id + secret in <b>Replit Secrets</b> — never in code','Keep the topology straight: Cortex runs on the machine wearing the headset; the repl connects to <code>wss://localhost:6868</code> through it','Ask Replit Agent to scaffold authorize → createSession → subscribe, then actually read what it wrote','Build the feature on top: a live metric chart, a focus logger, a webhook that fires when attention drops','Deploy. The URL is your demo — nothing to install for whoever you show it to'],
+   tips:['Start from the working scaffold, change one thing at a time','Free-tier repls sleep; pin the tab during demos'],
    docs:[['⌘','Cortex API docs','Full reference','https://emotiv.gitbook.io/cortex-api/'],['🐙','cortex-example','Clone + adapt','https://github.com/Emotiv/cortex-example'],['🟠','Replit docs','Secrets, Agent, Deploy','https://docs.replit.com/'],['🛠','Emotiv developer','Cortex hub','https://www.emotiv.com/developer']]
  }
 };
@@ -463,7 +385,7 @@ function openStory(t){
   (t.story||[]).forEach(p=>h+='<p>'+p+'</p>');
   dBody.innerHTML=h;
   dFoot.innerHTML='<button class="cta" id="mkbtn">'+(t.create||'Create')+' →</button>';
-  document.getElementById('mkbtn').addEventListener('click',()=>{location.href='requirements.html';});
+  document.getElementById('mkbtn').addEventListener('click',()=>openGuide(t.guide));
   const vw=dBody.querySelector('.vwrap[data-yt]');
   if(vw)vw.addEventListener('click',()=>{vw.parentElement.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+vw.dataset.yt+'?autoplay=1&rel=0" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe>';},{once:true});
   openDrawer();
@@ -484,13 +406,13 @@ function openGuide(id){
   if(g.video)h+='<div class="d-media"><div class="vwrap" data-yt="'+g.video+'"><img src="https://i.ytimg.com/vi/'+g.video+'/hqdefault.jpg" alt=""><div class="pb"><span>▶</span></div></div></div>';
   h+='<h2>'+g.title+'</h2><p>'+g.intro+'</p>';
   if(g.flow){h+='<div class="sect">How it flows</div>'+flowHTML(g.flow);}
-  if(g.need){h+='<div class="sect">What you\'ll need</div><ul class="plain">'+g.need.map(x=>'<li>'+x+'</li>').join('')+'</ul>';}
+  
   if(g.steps){h+='<div class="sect">Step by step</div><ol class="steps">'+g.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol>';}
   if(g.tips){h+='<div class="sect">Tips</div><ul class="plain">'+g.tips.map(x=>'<li>'+x+'</li>').join('')+'</ul>';}
   if(g.note)h+='<div class="note"><span>ℹ️</span><span>'+g.note+'</span></div>';
   if(g.docs){h+='<div class="sect">Docs &amp; references</div><div class="docs">'+g.docs.map(d=>'<a href="'+d[3]+'" target="_blank" rel="noopener"><span class="di">'+d[0]+'</span><span class="dt">'+d[1]+'<span class="dg" style="display:block;font-weight:400">'+d[2]+'</span></span><span class="dx">↗</span></a>').join('')+'</div>';}
   dBody.innerHTML=h;
-  dFoot.innerHTML='<a class="cta" href="https://www.emotiv.com/developer" target="_blank" rel="noopener">Open EMOTIV Developer →</a><button class="cta ghost" id="backbtn">‹ Back to the story</button>';
+  dFoot.innerHTML='<a class="cta" href="requirements.html">See what you&#39;ll need →</a><button class="cta ghost" id="backbtn">‹ Back to the story</button>';
   document.getElementById('backbtn').addEventListener('click',()=>openStory(currentTile));
   const vw=dBody.querySelector('.vwrap[data-yt]');
   if(vw)vw.addEventListener('click',()=>{vw.parentElement.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+vw.dataset.yt+'?autoplay=1&rel=0" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe>';},{once:true});

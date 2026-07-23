@@ -275,7 +275,7 @@ function openOverview(t){
   h+='<div class="sect">What you\'ll see</div><div class="expect"><span>✨</span><span class="e-t">'+t.expect+'</span></div>';
   dBody.innerHTML=h;
   dFoot.innerHTML='<button class="cta" id="setupbtn">Set up this experiment →</button>';
-  document.getElementById('setupbtn').addEventListener('click',()=>{location.href='requirements.html';});
+  document.getElementById('setupbtn').addEventListener('click',()=>openGuide(t));
   drawer.classList.add('on');backdrop.classList.add('on');dBody.scrollTop=0;
 }
 function openGuide(t){
@@ -286,7 +286,7 @@ function openGuide(t){
   h+='<div class="sect">What you\'ll see</div><div class="expect"><span>✨</span><span class="e-t">'+t.expect+'</span></div>';
   h+='<div class="sect">Docs &amp; references</div><div class="docs">'+t.docs.map(d=>'<a href="'+d[3]+'" target="_blank" rel="noopener"><span class="di">'+d[0]+'</span><span class="dt">'+d[1]+'<span>'+d[2]+'</span></span><span class="dx">↗</span></a>').join('')+'</div>';
   dBody.innerHTML=h;
-  dFoot.innerHTML='<a class="cta" href="https://emotiv.gitbook.io/emotivpro-builder/" target="_blank" rel="noopener">Open EmotivPRO Builder →</a><button class="cta ghost" id="backbtn">‹ Back to overview</button>';
+  dFoot.innerHTML='<a class="cta" href="requirements.html">See what you&#39;ll need →</a><button class="cta ghost" id="backbtn">‹ Back to overview</button>';
   document.getElementById('backbtn').addEventListener('click',()=>openOverview(cur));
   dBody.scrollTop=0;
 }
