@@ -417,7 +417,10 @@ fetch("/projects/onboarding/draft-1/logo.svg").then(r => r.text()).then(t => {
   const tmp = document.createElement("div");
   tmp.innerHTML = t;
   const svg = tmp.querySelector("svg");
-  if (svg) document.getElementById("logo").innerHTML = svg.innerHTML;
+  if (svg) {
+    svg.querySelectorAll("path").forEach(p => p.setAttribute("fill", "currentColor"));
+    document.getElementById("logo").innerHTML = svg.innerHTML;
+  }
 }).catch(() => {});
 
 show(0);
